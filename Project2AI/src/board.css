@@ -1,0 +1,11 @@
+.square {
+    -fx-fill: WHITE;
+    -fx-stroke: black; 
+    -fx-stroke-width: 0.7;
+}
+
+.triangle {
+    -fx-fill: GRAY;
+    -fx-stroke: black; 
+    -fx-stroke-width: 0.7;
+}
