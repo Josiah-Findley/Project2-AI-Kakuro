@@ -29,6 +29,7 @@ public class Kakuro extends Application {
     	
     	KakuroBoard board = new KakuroBoard();//Grab the board
     	
+    	
     	//Set Variables
     	int rowNum = board.getRowNum();
     	int colNum = board.getColNum();
@@ -105,6 +106,7 @@ public class Kakuro extends Application {
 		//Add the Scene to the Stage
 		primaryStage.setScene(appScene);
 		primaryStage.show();//launch app
+
     }
 
 
