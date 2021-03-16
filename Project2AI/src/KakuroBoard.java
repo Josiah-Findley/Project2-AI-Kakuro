@@ -43,13 +43,13 @@ public class KakuroBoard {
 		//New CSP to account for updated board
 		csp.setBoard(board);
 		//Reduce on H and V Possible values
-		//csp.reduceOnPosValues();
+		csp.reduceOnPosValues();
 		//Reduce Using AC3
 		//csp.AC3(csp.arcs());
 
-		csp.BackTracking(csp.getAllNonWallCells().getFirst());
+		System.out.println(csp.BackTracking(csp.getAllNonWallCells().getFirst()));
 		this.setBoard(csp.getBoard());
-		//System.out.println(this.toString());
+		System.out.println(this.toString());
 	}
 
 		/**
@@ -131,9 +131,6 @@ public class KakuroBoard {
 					}	
 		}
 
-
-		
-		
 		public String toString() {
 			String returned ="";
 			for (int row = 0; row < rowNum; row++) {
@@ -201,29 +198,23 @@ public class KakuroBoard {
 			return board;
 		}
 
-
 		public void setBoard(Cell[][] board) {
 			this.board = board;
 		}
-
 
 		public int getRowNum() {
 			return rowNum;
 		}
 
-
 		public void setRowNum(int rowNum) {
 			this.rowNum = rowNum;
 		}
-
 
 		public int getColNum() {
 			return colNum;
 		}
 
-
 		public void setColNum(int colNum) {
 			this.colNum = colNum;
 		}
-
 	}

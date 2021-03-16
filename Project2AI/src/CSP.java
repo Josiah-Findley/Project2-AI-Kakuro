@@ -228,7 +228,7 @@ public class CSP {
 		return revised;
 	}
 
-	public boolean BackTracking(Cell x) {
+	public boolean BackTrackingWPartions(Cell x) {
 		//for each value in domain
 		for(int a: x.getDomain()) {
 			boolean duplicateVal = false; //Check to see if value has been used
@@ -282,7 +282,7 @@ public class CSP {
 				x.setValue(a);//Set value to a
 				if(nextC!=null) {//If not end of board
 					//Recursion
-					if(BackTracking(nextC))
+					if(BackTrackingWPartions(nextC))
 						return true;//return true if solved
 				}
 				else {//If end of Board
@@ -294,6 +294,85 @@ public class CSP {
 		return false; //Else return false
 	}
 
+	public boolean BackTracking(Cell x) {
+		//for each value in domain
+		for(int a: x.getDomain()) {
+			boolean duplicateVal = false; //Check to see if value has been used
+			//Satified on H and V
+			boolean satisfiesHConstraints = false;	
+			boolean satisfiesVConstraints = false;	
+
+			//******Horizontal******//
+			Set<Integer> hvalues = new HashSet<Integer>();//Set of values of Horiz Neighhood
+			hvalues.add(a);//Add self
+			for(Cell y: x.getHorizNeighbors()) {//Add neighbors
+				hvalues.add(y.getValue());
+				if(y.getValue()==a)
+					duplicateVal = true; //set true if already exist
+			}
+			//Generate sums
+			int hSum =0;
+			for(int k: x.getHorizPosVals().get(0))
+				hSum+=k;	//add to sum
+			int hValSum =0;
+			for(int k: hvalues)
+				hValSum+=k;	//add to sum
+			//If a value has a 0, then sum can be up to hSum
+			if(hvalues.contains(0)) {
+				if(hValSum<=hSum) //if a partition contains the neighborhood
+					satisfiesHConstraints = true;
+			}
+			//else sum must equal hsum
+			else {
+				if(hValSum==hSum) //if a partition contains the neighborhood
+					satisfiesHConstraints = true;
+			}
+
+			//******Vertical******//
+			Set<Integer> vertValues = new HashSet<Integer>();//Set of values of Horiz Neighhood
+			vertValues.add(a);//Add self
+			for(Cell y: x.getVertNeighbors()) {//Add neighbors
+				vertValues.add(y.getValue());
+				if(y.getValue()==a)
+					duplicateVal = true;//set true if already exist
+			}			
+			//Generate sums
+			int vSum =0;
+			for(int k: x.getVertPosVals().get(0))
+				vSum+=k;	//add to sum
+			int vValSum =0;
+			for(int k: vertValues)
+				vValSum+=k;	//add to sum
+			//If a value has a 0, then sum can be up to vSum
+			if(vertValues.contains(0)) {
+				if(vValSum<=vSum) //if a partition contains the neighborhood
+					satisfiesVConstraints = true;
+			}
+			//else sum must equal vSum
+			else {
+				if(vValSum==vSum) //if a partition contains the neighborhood
+					satisfiesVConstraints = true;
+			}
+
+
+			//If Constraints are met
+			if(satisfiesHConstraints&&satisfiesVConstraints&&!duplicateVal) {
+				x.setValue(a);//Set value to a
+				//Grab next Cell
+				Cell nextC = allNonWallCells.get(allNonWallCells.indexOf(x)+1);	
+				if(nextC!=null) {//If not end of board
+					//Recursion
+					if(BackTracking(nextC))
+						return true;//return true if solved
+				}
+				else {//If end of Board
+					return true;//Found solved board
+				}
+			}
+			x.setValue(0);//Reset x value during backtracking
+		}	
+		return false; //Else return false
+	}
 
 
 
