@@ -1,7 +1,9 @@
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 import java.util.Set;
 
@@ -10,12 +12,15 @@ public class CSP {
 	private Cell[][] board;
 	private int rowNum;
 	private int colNum;
+	private LinkedList<Cell> allNonWallCells;
 
 	//Constructor
 	public CSP(Cell[][] board){
 		this.board = board;
 		this.rowNum = board.length;
 		this.colNum = board[0].length;
+		allNonWallCells = new LinkedList<Cell>();
+		addNonWalls();//Add all nonWalls
 	}
 
 	/**
@@ -44,7 +49,6 @@ public class CSP {
 						arcs.add(arc);	
 					}	
 				}
-				//System.out.println(arcs.size());
 			}
 		}
 		return arcs;
@@ -88,7 +92,7 @@ public class CSP {
 			}
 		}
 	}
-	
+
 	public void trashPartitions(Cell x) {
 		/****Trash Partitions****/
 		//Remove all vpartitions that don't have any values in domain
@@ -141,6 +145,21 @@ public class CSP {
 		}
 		return true;
 	}
+
+
+	public void addNonWalls() {
+		//add all nonWalls to linked list
+		for (int row = 0; row < rowNum; row++) {
+			for (int col = 0; col < colNum; col++) {			
+				if(!board[row][col].getIsWall()){		
+					allNonWallCells.add(board[row][col]);
+				}
+			}
+		}
+		allNonWallCells.add(null); //null to signal end
+	}
+
+
 
 
 	public boolean Revise(Cell x, Cell y) {
@@ -199,9 +218,9 @@ public class CSP {
 			//Remove trashed domain values
 			for(int a: hTrashSet)
 				x.getDomain().remove(a);
-			
+
 		}
-		
+
 		/****Trash Partitions****/
 		trashPartitions(x); 
 
@@ -209,6 +228,71 @@ public class CSP {
 		return revised;
 	}
 
+	public boolean BackTracking(Cell x) {
+		//for each value in domain
+		for(int a: x.getDomain()) {
+			boolean duplicateVal = false; //Check to see if value has been used
+			//Satified on H and V
+			boolean satisfiesHConstraints = false;	
+			boolean satisfiesVConstraints = false;	
+
+			//******Horizontal******//
+			Set<Integer> hvalues = new HashSet<Integer>();//Set of values of Horiz Neighhood
+			hvalues.add(a);//Add self
+			for(Cell y: x.getHorizNeighbors()) {//Add neighbors
+				if(y.getValue()!=0)
+					hvalues.add(y.getValue());
+				if(y.getValue()==a)
+					duplicateVal = true; //set true if already exist
+			}
+			//Set of Partitions
+			Set<Integer> targetHSet= new HashSet<Integer>();
+			//For each partition
+			for(int[] hp:x.getHorizPosVals()) {
+				targetHSet.clear();
+				for(int k: hp)
+					targetHSet.add(k);	//Change to set
+				if(targetHSet.containsAll((hvalues))) //if a partition contains the neighborhood
+					satisfiesHConstraints = true;	
+			}
+
+			//******Vertical******//
+			Set<Integer> vertValues = new HashSet<Integer>();//Set of values of Horiz Neighhood
+			vertValues.add(a);//Add self
+			for(Cell y: x.getVertNeighbors()) {//Add neighbors
+				if(y.getValue()!=0)
+					vertValues.add(y.getValue());
+				if(y.getValue()==a)
+					duplicateVal = true;//set true if already exist
+			}				
+			//Set of Partitions
+			Set<Integer> targetVSet= new HashSet<Integer>();
+			//For each partition
+			for(int[] vp:x.getVertPosVals()) {
+				targetVSet.clear();
+				for(int k: vp)
+					targetVSet.add(k);	//Change to set
+				if(targetVSet.containsAll(vertValues)) //if a partition contains the neighborhood
+					satisfiesVConstraints = true;	
+			}
+			//Grab next Cell
+			Cell nextC = allNonWallCells.get(allNonWallCells.indexOf(x)+1);
+			//If Constraints are met
+			if(satisfiesHConstraints&&satisfiesVConstraints&&!duplicateVal) {
+				x.setValue(a);//Set value to a
+				if(nextC!=null) {//If not end of board
+					//Recursion
+					if(BackTracking(nextC))
+						return true;//return true if solved
+				}
+				else {//If end of Board
+					return true;//Found solved board
+				}
+			}
+			x.setValue(0);//Reset x value during backtracking
+		}	
+		return false; //Else return false
+	}
 
 
 
@@ -275,7 +359,7 @@ public class CSP {
 			}
 		}
 	}
-	
+
 	/*************************Getters and Setters**************************/
 
 	public Cell[][] getBoard() {
@@ -300,6 +384,14 @@ public class CSP {
 
 	public void setColNum(int colNum) {
 		this.colNum = colNum;
+	}
+
+	public LinkedList<Cell> getAllNonWallCells() {
+		return allNonWallCells;
+	}
+
+	public void setAllNonWallCells(LinkedList<Cell> allNonWallCells) {
+		this.allNonWallCells = allNonWallCells;
 	}
 
 }

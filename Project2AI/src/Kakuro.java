@@ -28,7 +28,7 @@ public class Kakuro extends Application {
     public void start(Stage primaryStage) throws IOException {
     	
     	KakuroBoard board = new KakuroBoard();//Grab the board
-    	
+    	board.solveKakuro();
     	
     	//Set Variables
     	int rowNum = board.getRowNum();

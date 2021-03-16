@@ -21,10 +21,12 @@ public class KakuroBoard {
 	private int colNum;
 	private CSP csp;
 
+
 	/**
 	 * Constructor
 	 */
 	public KakuroBoard() throws IOException{
+
 		Cell[][] boardTxt = IO();//Grab board
 		//init values
 		this.board = boardTxt;
@@ -41,11 +43,13 @@ public class KakuroBoard {
 		//New CSP to account for updated board
 		csp.setBoard(board);
 		//Reduce on H and V Possible values
-		csp.reduceOnPosValues();
+		//csp.reduceOnPosValues();
 		//Reduce Using AC3
-		csp.AC3(csp.arcs());
+		//csp.AC3(csp.arcs());
+
+		csp.BackTracking(csp.getAllNonWallCells().getFirst());
 		this.setBoard(csp.getBoard());
-		System.out.println(this.toString());
+		//System.out.println(this.toString());
 	}
 
 		/**
@@ -118,7 +122,7 @@ public class KakuroBoard {
 							for(Cell n: vertNeighborhood) {
 								ArrayList<Cell> vertNeighborhoodCopy = new ArrayList<Cell>(vertNeighborhood);
 								vertNeighborhoodCopy.remove(n);
-								n.setHorizNeighbors(vertNeighborhoodCopy);
+								n.setVertNeighbors(vertNeighborhoodCopy);
 
 								//Add possible vertical Values
 								n.setVertPosVals((csp.findPartitions(vertVal, vertNeighborhood.size())));
@@ -137,10 +141,7 @@ public class KakuroBoard {
 					//Horizontal arcs
 					
 					if(!board[row][col].getIsWall()){
-						List<Integer> sortedList = new ArrayList<>(board[row][col].getDomain());
-						Collections.sort(sortedList);
-						returned += ("Row: "+row+" Col: "+col+" D: "+ sortedList.toString()+"\n");
-
+						returned += board[row][col].toString()+"\n";
 					}
 				}
 			}
