@@ -577,10 +577,11 @@ public class CSP {
 	public boolean BackTrackingWForwardCheckingAC3(Cell x, Set<Integer> xDom) {
 		//for each int in domain
 		for(int a: xDom) {		
+			Cell[][] dcBoard = deepCopy(board);
 			x.getDomain().clear();
 			x.getDomain().add(a);
 			x.setValue(a);//Set value to a	
-			Cell[][] dcBoard = deepCopy(board);
+			
 			addNeighborsAndPosValues(dcBoard);
 			//If Constraints are met
 			if(AC3(arcs(dcBoard))) {
