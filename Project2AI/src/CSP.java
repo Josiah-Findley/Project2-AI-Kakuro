@@ -19,8 +19,7 @@ public class CSP {
 		this.board = board;
 		this.rowNum = board.length;
 		this.colNum = board[0].length;
-		allNonWallCells = new LinkedList<Cell>();
-		addNonWalls();//Add all nonWalls
+		allNonWallCells = addNonWalls(board);//Add all nonWalls
 	}
 
 	/**
@@ -122,7 +121,8 @@ public class CSP {
 	/**
 	 * Create list of nonWalls
 	 */
-	public void addNonWalls() {
+	public LinkedList<Cell> addNonWalls(Cell[][] board) {
+		LinkedList<Cell> allNonWallCells= new LinkedList<Cell>();
 		//add all nonWalls to linked list
 		for (int row = 0; row < rowNum; row++) {
 			for (int col = 0; col < colNum; col++) {			
@@ -132,37 +132,35 @@ public class CSP {
 			}
 		}
 		allNonWallCells.add(null); //null to signal end
+		return allNonWallCells;
 	}
 
 	/*************************AC3**************************/
 	/**
 	 * Create all Arcs 
 	 */
-	public Queue<Cell[]> arcs(Cell[][] board) {
+	public Queue<Cell[]> arcs(Cell[][] board, Cell x) {
 		Queue<Cell[]> arcs= new LinkedList<Cell[]>();
 		//For each Cell that is not a wall add arc to queue
-		for (int row = 0; row < rowNum; row++) {
-			for (int col = 0; col < colNum; col++) {
+
 				//Horizontal arcs
-				if(board[row][col].getHorizNeighbors()!=null){
-					for(Cell c: board[row][col].getHorizNeighbors()) {
+				if(x.getHorizNeighbors()!=null){
+					for(Cell c: x.getHorizNeighbors()) {
 						Cell[] arc= new Cell[2];
-						arc[0]=board[row][col];
+						arc[0]=x;
 						arc[1]= c;
 						arcs.add(arc);	
 					}
 				}
 				//Vertical arcs
-				if(board[row][col].getVertNeighbors()!=null){
-					for(Cell c: board[row][col].getVertNeighbors()) {
+				if(x.getVertNeighbors()!=null){
+					for(Cell c: x.getVertNeighbors()) {
 						Cell[] arc= new Cell[2];
-						arc[0]=board[row][col];
+						arc[0]=x;
 						arc[1]= c;
 						arcs.add(arc);	
 					}	
 				}
-			}
-		}
 		return arcs;
 	}
 	/**
@@ -230,7 +228,7 @@ public class CSP {
 				// values to keep in domain
 				HashSet<Integer> hSet = new HashSet<Integer>();
 				//Reset values to remove from domain
-				//hTrashSet.clear(); 
+
 				//Add all vp values
 				for(int[] vp: y.getHorizPosVals()) {
 					for(int i:vp) {
@@ -250,7 +248,7 @@ public class CSP {
 		}
 
 		/****Trash Partitions****/
-		trashPartitions(x); 
+		//trashPartitions(x); 
 		return revised;
 	}
 	/**
@@ -550,26 +548,37 @@ public class CSP {
 	} 
 
 	/*************************AC3**************************/
-	public boolean BackTrackingAC3(Cell x) {
+	public boolean BackTrackingAC3(Cell x, Cell[][] dcB) {
+		Set<Integer> dom = new HashSet<Integer>();
+		for(int d: x.getDomain())
+			dom.add(d);
 		//for each value in domain
-		for(int a: x.getDomain()) {
-			Cell[][] dcBoard = deepCopy(board);
+		for(int a: dom) {
+			x.getDomain().clear();
+			x.getDomain().add(a);
+			x.setValue(a);//Set value to a	
+			Cell[][] dcBoard = deepCopy(dcB);
 			addNeighborsAndPosValues(dcBoard);
+		//	System.out.println(toString(dcBoard));
+		//	System.out.println(dcBoard[1][4].getHorizNeighbors().get(0));
+
+			LinkedList<Cell> allNonWallC = addNonWalls(dcBoard);//Add all nonWalls
 			//If Constraints are met
-			if(AC3(arcs(dcBoard))) {
-				x.setValue(a);//Set value to a
+			if(AC3(arcs(dcBoard, dcBoard[x.getRow()][x.getCol()]))) {
+
 				//Grab next Cell
-				Cell nextC = allNonWallCells.get(allNonWallCells.indexOf(x)+1);	
+				Cell nextC = allNonWallC.get(allNonWallC.indexOf(dcBoard[x.getRow()][x.getCol()])+1);	
 				if(nextC!=null) {//If not end of board
 					//Recursion
-					if(BackTrackingAC3(nextC))
+					if(BackTrackingAC3(nextC, dcBoard))
 						return true;//return true if solved
 				}
 				else {//If end of Board
+					System.out.println(toString(dcBoard));
 					return true;//Found solved board
 				}
 			}
-			x.setValue(0);//Reset x value during backtracking
+			x.setValue(0);
 		}	
 		return false; //Else return false
 	}
@@ -577,14 +586,12 @@ public class CSP {
 	public boolean BackTrackingWForwardCheckingAC3(Cell x, Set<Integer> xDom) {
 		//for each int in domain
 		for(int a: xDom) {		
-			Cell[][] dcBoard = deepCopy(board);
 			x.getDomain().clear();
 			x.getDomain().add(a);
 			x.setValue(a);//Set value to a	
-			
-			addNeighborsAndPosValues(dcBoard);
+			Cell[][] dcBoard = deepCopy(board);
 			//If Constraints are met
-			if(AC3(arcs(dcBoard))) {
+			if(AC3(arcs(dcBoard, x))) {
 				//Grab next Cell
 				Cell nextC = allNonWallCells.get(allNonWallCells.indexOf(x)+1);	
 				if(nextC!=null) {//If not end of board
@@ -850,7 +857,7 @@ public class CSP {
 	}
 
 	/*************************toString**************************/
-	public String toString() {
+	public String toString(Cell[][] board) {
 		String returned ="";
 		for (int row = 0; row < rowNum; row++) {
 			for (int col = 0; col < colNum; col++) {

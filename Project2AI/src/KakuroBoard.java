@@ -80,7 +80,7 @@ public class KakuroBoard {
 		start = System.nanoTime();//Start timer
 		csp.addNeighborsAndPosValues(csp.getBoard());
 		System.out.println("BackTrackingAC3: ");
-		System.out.println(csp.BackTrackingAC3(csp.getAllNonWallCells().getFirst()));
+		System.out.println(csp.BackTrackingAC3(csp.getAllNonWallCells().getFirst(), csp.getBoard()));
 		finish = System.nanoTime();//end timer
 		timeInMSecs = (finish-start)/1000;
 		System.out.println (timeInMSecs);
