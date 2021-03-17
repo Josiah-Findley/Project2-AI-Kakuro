@@ -20,6 +20,7 @@ public class KakuroBoard {
 	private int rowNum;
 	private int colNum;
 	private CSP csp;
+	private String boardName = "kakuroBoard3.txt";
 
 
 	/**
@@ -48,43 +49,104 @@ public class KakuroBoard {
 
 		csp = new CSP(board);
 		start = System.nanoTime();//Start timer
+<<<<<<< HEAD
 		//Add and reduce Values	
 
 
 
 		//#1
 		System.out.println("BackTrackingSimple: ");
+=======
+		//Add and reduce Values		
+		System.out.println("BackTrackingSimple: solving " + boardName);
+>>>>>>> branch 'master' of https://github.com/Josiah-Findley/Project2-AI-Kakuro.git
 		System.out.println(csp.BackTracking(csp.getAllNonWallCells().getFirst()));
 		finish = System.nanoTime();//end timer
 		timeInMSecs = (finish-start)/1000;
+<<<<<<< HEAD
 		System.out.println (timeInMSecs);
 		System.out.println();
 
 		//#2
+=======
+		System.out.println (timeInMSecs + " mSecs");
+		
+>>>>>>> branch 'master' of https://github.com/Josiah-Findley/Project2-AI-Kakuro.git
 		//Reset Board and CSP init vals
 		board = IO();
 		csp = new CSP(board);
 		start = System.nanoTime();//Start timer
+<<<<<<< HEAD
 		csp.addNeighborsAndPosValues(csp.getBoard());
 		System.out.println("BackTrackingWPartitions: ");
+=======
+		//Add and reduce Values
+		addNeighborsAndPosValues();
+		System.out.println("BackTrackingWPartitions: solving " + boardName);
+>>>>>>> branch 'master' of https://github.com/Josiah-Findley/Project2-AI-Kakuro.git
 		System.out.println(csp.BackTrackingWPartitions(csp.getAllNonWallCells().getFirst()));
 		finish = System.nanoTime();//end timer
 		timeInMSecs = (finish-start)/1000;
+<<<<<<< HEAD
 		System.out.println (timeInMSecs);
 		System.out.println();
+=======
+		System.out.println (timeInMSecs + " mSecs");
+>>>>>>> branch 'master' of https://github.com/Josiah-Findley/Project2-AI-Kakuro.git
 
 		//#3
 		//Reset Board and CSP init vals
 		board = IO();
 		csp = new CSP(board);
 		start = System.nanoTime();//Start timer
+<<<<<<< HEAD
 		csp.addNeighborsAndPosValues(csp.getBoard());
 		System.out.println("BackTrackingAC3: ");
 		System.out.println(csp.BackTrackingAC3(csp.getAllNonWallCells().getFirst(), csp.getBoard()));
+=======
+		//Add and reduce Values		
+		addNeighborsAndPosValues();
+		System.out.println("BackTrackingWForwardChecking: solving " + boardName);
+		System.out.println(csp.BackTrackingWForwardChecking(csp.getAllNonWallCells().getFirst(), csp.getAllNonWallCells().getFirst().getDomain()));
+>>>>>>> branch 'master' of https://github.com/Josiah-Findley/Project2-AI-Kakuro.git
 		finish = System.nanoTime();//end timer
 		timeInMSecs = (finish-start)/1000;
+<<<<<<< HEAD
 		System.out.println (timeInMSecs);
 		System.out.println();
+=======
+		System.out.println (timeInMSecs + " mSecs");
+		
+		//Reset Board and CSP init vals
+		board = IO();
+		csp = new CSP(board);
+		
+		start = System.nanoTime();//Start timer
+		//Add and reduce Values		
+		addNeighborsAndPosValues();
+		csp.reduceOnPosValues();
+		System.out.println("BackTrackingWPartitions and init Reduction: solving " + boardName);
+		System.out.println(csp.BackTrackingWPartitions(csp.getAllNonWallCells().getFirst()));
+		finish = System.nanoTime();//end timer
+		timeInMSecs = (finish-start)/1000;
+		System.out.println (timeInMSecs + " mSecs");
+
+		//Reset Board and CSP init vals
+		board = IO();
+		csp = new CSP(board);
+		
+		//add Neighbors and Possible Values
+		start = System.nanoTime();//Start timer
+		//Add and reduce Values
+		addNeighborsAndPosValues();
+		csp.reduceOnPosValues();
+		//csp.AC3(csp.arcs());
+		System.out.println("BackTracking and init Reduction: solving " + boardName);
+		System.out.println(csp.BackTracking(csp.getAllNonWallCells().getFirst()));
+		finish = System.nanoTime();//end timer
+		timeInMSecs = (finish-start)/1000;
+		System.out.println (timeInMSecs + " mSecs");
+>>>>>>> branch 'master' of https://github.com/Josiah-Findley/Project2-AI-Kakuro.git
 
 
 
@@ -110,7 +172,7 @@ public class KakuroBoard {
 	public Cell[][] IO() throws IOException {
 
 		//Parsing Neighbors File
-		File gameFile = new File("kakuroBoard.txt"); //Grab file
+		File gameFile = new File(boardName); //Grab file
 		Scanner in = new Scanner(gameFile);//Scan file
 
 		String row = in.nextLine(); //Grab line
