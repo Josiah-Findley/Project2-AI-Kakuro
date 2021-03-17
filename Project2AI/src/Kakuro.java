@@ -29,6 +29,7 @@ public class Kakuro extends Application {
     	
     	KakuroBoard board = new KakuroBoard();//Grab the board
     	board.solveKakuro();
+
     	
     	//Set Variables
     	int rowNum = board.getRowNum();

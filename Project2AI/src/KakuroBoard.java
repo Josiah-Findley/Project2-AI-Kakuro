@@ -28,12 +28,16 @@ public class KakuroBoard {
 	public KakuroBoard() throws IOException{
 
 		Cell[][] boardTxt = IO();//Grab board
+
 		//init values
 		this.board = boardTxt;
 		this.rowNum = boardTxt.length;
 		this.colNum = boardTxt[0].length;
 		this.csp = new CSP(board);	
+		//System.out.println(csp.toString());
+
 		addNeighborsAndPosValues();
+
 	}
 
 
@@ -45,68 +49,116 @@ public class KakuroBoard {
 
 		csp = new CSP(board);
 		start = System.nanoTime();//Start timer
-		//Add and reduce Values		
+		//Add and reduce Values	
+
+
+
+		//#1
 		System.out.println("BackTrackingSimple: ");
 		System.out.println(csp.BackTracking(csp.getAllNonWallCells().getFirst()));
 		finish = System.nanoTime();//end timer
 		timeInMSecs = (finish-start)/1000;
 		System.out.println (timeInMSecs);
-		
+		System.out.println();
+
+		//#2
 		//Reset Board and CSP init vals
 		board = IO();
 		csp = new CSP(board);
 		start = System.nanoTime();//Start timer
-		//Add and reduce Values
-		addNeighborsAndPosValues();
+		addNeighborsAndPosValues();//Add and reduce Values	
 		System.out.println("BackTrackingWPartitions: ");
 		System.out.println(csp.BackTrackingWPartitions(csp.getAllNonWallCells().getFirst()));
 		finish = System.nanoTime();//end timer
 		timeInMSecs = (finish-start)/1000;
 		System.out.println (timeInMSecs);
+		System.out.println();
 
-
+		//#3
 		//Reset Board and CSP init vals
 		board = IO();
 		csp = new CSP(board);
-
 		start = System.nanoTime();//Start timer
-		//Add and reduce Values		
-		addNeighborsAndPosValues();
+		addNeighborsAndPosValues();//Add and reduce Values	
+		System.out.println("BackTrackingAC3: ");
+		System.out.println(csp.BackTrackingAC3(csp.getAllNonWallCells().getFirst()));
+		finish = System.nanoTime();//end timer
+		timeInMSecs = (finish-start)/1000;
+		System.out.println (timeInMSecs);
+		System.out.println();
+
+		//#4
+		//Reset Board and CSP init vals
+		board = IO();
+		csp = new CSP(board);
+		start = System.nanoTime();//Start timer
 		System.out.println("BackTrackingWForwardChecking: ");
-		System.out.println(csp.BackTrackingWForwardChecking(csp.getAllNonWallCells().getFirst(), csp.getAllNonWallCells().getFirst().getDomain()));
+		Set<Integer> dom = new HashSet<Integer>();
+		for(int d: csp.getAllNonWallCells().getFirst().getDomain())
+			dom.add(d);
+		System.out.println(csp.BackTrackingWForwardChecking(csp.getAllNonWallCells().getFirst(),dom));
 		finish = System.nanoTime();//end timer
 		timeInMSecs = (finish-start)/1000;
 		System.out.println (timeInMSecs);
-		
+		System.out.println();
+
+		//#5
 		//Reset Board and CSP init vals
 		board = IO();
 		csp = new CSP(board);
-		
 		start = System.nanoTime();//Start timer
 		//Add and reduce Values		
 		addNeighborsAndPosValues();
-		csp.reduceOnPosValues();
-		System.out.println("BackTrackingWPartitions and init Reduction: ");
-		System.out.println(csp.BackTrackingWPartitions(csp.getAllNonWallCells().getFirst()));
+		System.out.println("BackTrackingWForwardCheckingWPartitions: ");
+		Set<Integer> dom2 = new HashSet<Integer>();
+		for(int d: csp.getAllNonWallCells().getFirst().getDomain())
+			dom2.add(d);
+		System.out.println(csp.BackTrackingWForwardCheckingWPartitions(csp.getAllNonWallCells().getFirst(), dom2));
 		finish = System.nanoTime();//end timer
 		timeInMSecs = (finish-start)/1000;
 		System.out.println (timeInMSecs);
+		System.out.println();
 
+
+		//#6
 		//Reset Board and CSP init vals
 		board = IO();
 		csp = new CSP(board);
-		
+
 		//add Neighbors and Possible Values
 		start = System.nanoTime();//Start timer
 		//Add and reduce Values
 		addNeighborsAndPosValues();
-		csp.reduceOnPosValues();
-		//csp.AC3(csp.arcs());
-		System.out.println("BackTracking and init Reduction: ");
-		System.out.println(csp.BackTracking(csp.getAllNonWallCells().getFirst()));
+		System.out.println("BackTrackingWForwardCheckingAC3: ");
+		Set<Integer> dom3 = new HashSet<Integer>();
+		for(int d: csp.getAllNonWallCells().getFirst().getDomain())
+			dom3.add(d);
+		System.out.println(csp.BackTrackingWForwardCheckingAC3(csp.getAllNonWallCells().getFirst(),dom3));
 		finish = System.nanoTime();//end timer
 		timeInMSecs = (finish-start)/1000;
 		System.out.println (timeInMSecs);
+		System.out.println();
+
+		//#7
+		//Reset Board and CSP init vals
+		board = IO();
+		csp = new CSP(board);
+
+		//add Neighbors and Possible Values
+		start = System.nanoTime();//Start timer
+		//Add and reduce Values
+		addNeighborsAndPosValues();
+		System.out.println("BackTrackingWForwardCheckingWPartitionsAC3: ");
+		Set<Integer> dom4 = new HashSet<Integer>();
+		for(int d: csp.getAllNonWallCells().getFirst().getDomain())
+			dom4.add(d);
+		System.out.println(csp.BackTrackingWForwardCheckingWPartitionsAC3(csp.getAllNonWallCells().getFirst(),dom3));
+		finish = System.nanoTime();//end timer
+		timeInMSecs = (finish-start)/1000;
+		System.out.println (timeInMSecs);
+		System.out.println();
+
+
 
 
 
@@ -119,8 +171,8 @@ public class KakuroBoard {
 		//csp.AC3(csp.arcs());
 
 	}
-	
-	
+
+
 
 
 	/**

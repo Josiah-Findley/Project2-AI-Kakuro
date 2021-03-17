@@ -40,6 +40,15 @@ public class Cell {
 		
 	}
 	
+	public Cell(Cell c) {
+        this.isWall = c.isWall;
+        this.value = c.value;
+		this.row = c.row;
+		this.col = c.col;
+		this.domain = new HashSet<Integer>();
+		for(int i:c.getDomain())
+			domain.add(i);	
+    }
 	public String toString() {
 		String returned = "";
 		returned+="("+row+","+col+"): "+domain.toString()+" : "+value;
