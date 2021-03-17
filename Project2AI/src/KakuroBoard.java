@@ -35,8 +35,7 @@ public class KakuroBoard {
 		this.colNum = boardTxt[0].length;
 		this.csp = new CSP(board);	
 		//System.out.println(csp.toString());
-
-		addNeighborsAndPosValues();
+		csp.addNeighborsAndPosValues(csp.getBoard());
 
 	}
 
@@ -66,7 +65,7 @@ public class KakuroBoard {
 		board = IO();
 		csp = new CSP(board);
 		start = System.nanoTime();//Start timer
-		addNeighborsAndPosValues();//Add and reduce Values	
+		csp.addNeighborsAndPosValues(csp.getBoard());
 		System.out.println("BackTrackingWPartitions: ");
 		System.out.println(csp.BackTrackingWPartitions(csp.getAllNonWallCells().getFirst()));
 		finish = System.nanoTime();//end timer
@@ -79,7 +78,7 @@ public class KakuroBoard {
 		board = IO();
 		csp = new CSP(board);
 		start = System.nanoTime();//Start timer
-		addNeighborsAndPosValues();//Add and reduce Values	
+		csp.addNeighborsAndPosValues(csp.getBoard());
 		System.out.println("BackTrackingAC3: ");
 		System.out.println(csp.BackTrackingAC3(csp.getAllNonWallCells().getFirst()));
 		finish = System.nanoTime();//end timer
@@ -87,81 +86,9 @@ public class KakuroBoard {
 		System.out.println (timeInMSecs);
 		System.out.println();
 
-		//#4
-		//Reset Board and CSP init vals
-		board = IO();
-		csp = new CSP(board);
-		start = System.nanoTime();//Start timer
-		System.out.println("BackTrackingWForwardChecking: ");
-		Set<Integer> dom = new HashSet<Integer>();
-		for(int d: csp.getAllNonWallCells().getFirst().getDomain())
-			dom.add(d);
-		System.out.println(csp.BackTrackingWForwardChecking(csp.getAllNonWallCells().getFirst(),dom));
-		finish = System.nanoTime();//end timer
-		timeInMSecs = (finish-start)/1000;
-		System.out.println (timeInMSecs);
-		System.out.println();
-
-		//#5
-		//Reset Board and CSP init vals
-		board = IO();
-		csp = new CSP(board);
-		start = System.nanoTime();//Start timer
-		//Add and reduce Values		
-		addNeighborsAndPosValues();
-		System.out.println("BackTrackingWForwardCheckingWPartitions: ");
-		Set<Integer> dom2 = new HashSet<Integer>();
-		for(int d: csp.getAllNonWallCells().getFirst().getDomain())
-			dom2.add(d);
-		System.out.println(csp.BackTrackingWForwardCheckingWPartitions(csp.getAllNonWallCells().getFirst(), dom2));
-		finish = System.nanoTime();//end timer
-		timeInMSecs = (finish-start)/1000;
-		System.out.println (timeInMSecs);
-		System.out.println();
 
 
-		//#6
-		//Reset Board and CSP init vals
-		board = IO();
-		csp = new CSP(board);
-
-		//add Neighbors and Possible Values
-		start = System.nanoTime();//Start timer
-		//Add and reduce Values
-		addNeighborsAndPosValues();
-		System.out.println("BackTrackingWForwardCheckingAC3: ");
-		Set<Integer> dom3 = new HashSet<Integer>();
-		for(int d: csp.getAllNonWallCells().getFirst().getDomain())
-			dom3.add(d);
-		System.out.println(csp.BackTrackingWForwardCheckingAC3(csp.getAllNonWallCells().getFirst(),dom3));
-		finish = System.nanoTime();//end timer
-		timeInMSecs = (finish-start)/1000;
-		System.out.println (timeInMSecs);
-		System.out.println();
-
-		//#7
-		//Reset Board and CSP init vals
-		board = IO();
-		csp = new CSP(board);
-
-		//add Neighbors and Possible Values
-		start = System.nanoTime();//Start timer
-		//Add and reduce Values
-		addNeighborsAndPosValues();
-		System.out.println("BackTrackingWForwardCheckingWPartitionsAC3: ");
-		Set<Integer> dom4 = new HashSet<Integer>();
-		for(int d: csp.getAllNonWallCells().getFirst().getDomain())
-			dom4.add(d);
-		System.out.println(csp.BackTrackingWForwardCheckingWPartitionsAC3(csp.getAllNonWallCells().getFirst(),dom3));
-		finish = System.nanoTime();//end timer
-		timeInMSecs = (finish-start)/1000;
-		System.out.println (timeInMSecs);
-		System.out.println();
-
-
-
-
-
+	
 
 		//New CSP to account for updated board
 
@@ -175,86 +102,7 @@ public class KakuroBoard {
 
 
 
-	/**
-	 * add Neighbors vert and horiz for all cells 
-	 * add Possible Values vert and horiz for all cells
-	 */
-	public void addNeighborsAndPosValues() {
-
-		/**************Going Horizontal***************/
-		int counter;
-		for (int row = 0; row < rowNum; row++) {
-			//reindex
-			counter = 0;
-			while(counter<colNum) {
-				//go until not wall
-				while(counter<colNum && board[row][counter].getIsWall()) {
-					counter++;	
-				}
-				//if at end of board
-				if(counter==colNum)
-					break;
-
-				//get left wall val
-				int leftVal =(board[row][counter-1].getuTvalue());
-				//horiz neighborhood
-				ArrayList<Cell> horizNeighborhood = new ArrayList<Cell>();
-				//While not wall
-				while(counter<colNum && !board[row][counter].getIsWall()) {
-					horizNeighborhood.add(board[row][counter]);//Add to neighborhood
-					counter++;					
-				}
-
-				//Add horizontal neighbors for each member of neighborhood
-				for(Cell n: horizNeighborhood) {
-					ArrayList<Cell> horizNeighborhoodCopy = new ArrayList<Cell>(horizNeighborhood);
-					horizNeighborhoodCopy.remove(n);
-					n.setHorizNeighbors(horizNeighborhoodCopy);						
-					//Add possible horiz Values
-					n.setHorizPosVals(csp.findPartitions(leftVal, horizNeighborhood.size()));
-				}
-			}		
-		}
-
-		/**************Going Vertical***************/
-		int counterVert;
-		for (int col = 0; col < rowNum; col++) {
-			//reindex
-			counterVert = 0;
-			while(counterVert<rowNum) {
-				//go until not wall
-				while(counterVert<rowNum && board[counterVert][col].getIsWall()) {
-					counterVert++;	
-				}
-				//if at end of board
-				if(counterVert==rowNum)
-					break;
-
-				//get up wall val
-				int vertVal =(board[counterVert-1][col].getlTvalue());
-				//horiz neighborhood
-				ArrayList<Cell> vertNeighborhood = new ArrayList<Cell>();
-
-				//While not wall
-				while(counterVert<colNum && !board[counterVert][col].getIsWall()) {
-					vertNeighborhood.add(board[counterVert][col]);//Add to neighborhood
-					counterVert++;					
-				}
-
-				//Add vertical neighbors for each member of neighborhood
-				for(Cell n: vertNeighborhood) {
-					ArrayList<Cell> vertNeighborhoodCopy = new ArrayList<Cell>(vertNeighborhood);
-					vertNeighborhoodCopy.remove(n);
-					n.setVertNeighbors(vertNeighborhoodCopy);
-
-					//Add possible vertical Values
-					n.setVertPosVals((csp.findPartitions(vertVal, vertNeighborhood.size())));
-				}
-			}
-		}	
-	}
-
-
+	
 
 
 	/*************************Input parsing of files **************************/

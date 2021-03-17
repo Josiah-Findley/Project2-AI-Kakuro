@@ -34,8 +34,90 @@ public class CSP {
 					deepCopy[i][j] = new Cell(board[i][j]);
 				else
 					deepCopy[i][j] = (board[i][j]);
+		
 		return deepCopy;
 	}
+	
+	/**
+	 * add Neighbors vert and horiz for all cells 
+	 * add Possible Values vert and horiz for all cells
+	 */
+	public void addNeighborsAndPosValues(Cell[][] board) {
+
+		/**************Going Horizontal***************/
+		int counter;
+		for (int row = 0; row < rowNum; row++) {
+			//reindex
+			counter = 0;
+			while(counter<colNum) {
+				//go until not wall
+				while(counter<colNum && board[row][counter].getIsWall()) {
+					counter++;	
+				}
+				//if at end of board
+				if(counter==colNum)
+					break;
+
+				//get left wall val
+				int leftVal =(board[row][counter-1].getuTvalue());
+				//horiz neighborhood
+				ArrayList<Cell> horizNeighborhood = new ArrayList<Cell>();
+				//While not wall
+				while(counter<colNum && !board[row][counter].getIsWall()) {
+					horizNeighborhood.add(board[row][counter]);//Add to neighborhood
+					counter++;					
+				}
+
+				//Add horizontal neighbors for each member of neighborhood
+				for(Cell n: horizNeighborhood) {
+					ArrayList<Cell> horizNeighborhoodCopy = new ArrayList<Cell>(horizNeighborhood);
+					horizNeighborhoodCopy.remove(n);
+					n.setHorizNeighbors(horizNeighborhoodCopy);						
+					//Add possible horiz Values
+					n.setHorizPosVals(findPartitions(leftVal, horizNeighborhood.size()));
+				}
+			}		
+		}
+
+		/**************Going Vertical***************/
+		int counterVert;
+		for (int col = 0; col < rowNum; col++) {
+			//reindex
+			counterVert = 0;
+			while(counterVert<rowNum) {
+				//go until not wall
+				while(counterVert<rowNum && board[counterVert][col].getIsWall()) {
+					counterVert++;	
+				}
+				//if at end of board
+				if(counterVert==rowNum)
+					break;
+
+				//get up wall val
+				int vertVal =(board[counterVert-1][col].getlTvalue());
+				//horiz neighborhood
+				ArrayList<Cell> vertNeighborhood = new ArrayList<Cell>();
+
+				//While not wall
+				while(counterVert<colNum && !board[counterVert][col].getIsWall()) {
+					vertNeighborhood.add(board[counterVert][col]);//Add to neighborhood
+					counterVert++;					
+				}
+
+				//Add vertical neighbors for each member of neighborhood
+				for(Cell n: vertNeighborhood) {
+					ArrayList<Cell> vertNeighborhoodCopy = new ArrayList<Cell>(vertNeighborhood);
+					vertNeighborhoodCopy.remove(n);
+					n.setVertNeighbors(vertNeighborhoodCopy);
+
+					//Add possible vertical Values
+					n.setVertPosVals((findPartitions(vertVal, vertNeighborhood.size())));
+				}
+			}
+		}	
+	}
+
+
 
 	/**
 	 * Create list of nonWalls
@@ -52,7 +134,7 @@ public class CSP {
 		allNonWallCells.add(null); //null to signal end
 	}
 
-	/*************************AC3 init Reduction**************************/
+	/*************************AC3**************************/
 	/**
 	 * Create all Arcs 
 	 */
@@ -353,6 +435,7 @@ public class CSP {
 		}
 		// Check V neighbors
 		if(x.getVertNeighbors()!=null){
+
 			for(Cell c: x.getVertNeighbors()) {		
 				boolean satisfiesV = false;
 				//Deep Copy of domain
@@ -471,6 +554,7 @@ public class CSP {
 		//for each value in domain
 		for(int a: x.getDomain()) {
 			Cell[][] dcBoard = deepCopy(board);
+			addNeighborsAndPosValues(dcBoard);
 			//If Constraints are met
 			if(AC3(arcs(dcBoard))) {
 				x.setValue(a);//Set value to a
@@ -492,13 +576,14 @@ public class CSP {
 
 	public boolean BackTrackingWForwardCheckingAC3(Cell x, Set<Integer> xDom) {
 		//for each int in domain
-		for(int a: xDom) {	
-			Cell[][] dcBoard = deepCopy(board);
+		for(int a: xDom) {		
 			x.getDomain().clear();
 			x.getDomain().add(a);
-			x.setValue(a);//Set value to a			
+			x.setValue(a);//Set value to a	
+			Cell[][] dcBoard = deepCopy(board);
+			addNeighborsAndPosValues(dcBoard);
 			//If Constraints are met
-			if(ForwardChecking(x)&&AC3(arcs(dcBoard))) {
+			if(AC3(arcs(dcBoard))) {
 				//Grab next Cell
 				Cell nextC = allNonWallCells.get(allNonWallCells.indexOf(x)+1);	
 				if(nextC!=null) {//If not end of board
@@ -519,38 +604,6 @@ public class CSP {
 
 		return false; //Else return false
 	}
-
-	public boolean BackTrackingWForwardCheckingWPartitionsAC3(Cell x, Set<Integer> xDom) {
-		//for each int in domain
-		for(int a: xDom) {		
-			Cell[][] dcBoard = deepCopy(board);
-			x.getDomain().clear();
-			x.getDomain().add(a);
-			x.setValue(a);//Set value to a		
-
-			//If Constraints are met
-			if(ForwardCheckingWPartition(x)&&AC3(arcs(dcBoard))) {
-				//Grab next Cell
-				Cell nextC = allNonWallCells.get(allNonWallCells.indexOf(x)+1);	
-				if(nextC!=null) {//If not end of board
-					//Recursion
-					Set<Integer> dom = new HashSet<Integer>();
-					for(int d: nextC.getDomain())
-						dom.add(d);
-					if(BackTrackingWForwardCheckingWPartitionsAC3(nextC, dom))
-						return true;//return true if solved
-				}
-				else {//If end of Board
-					return true;//Found solved board
-				}
-			}
-			x.setValue(0);//Reset x value during backtracking
-		}	
-		x.setDomain(xDom);
-
-		return false; //Else return false
-	}
-
 
 	/*************************Checking Constraints**************************/
 

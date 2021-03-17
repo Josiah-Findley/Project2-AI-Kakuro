@@ -48,6 +48,7 @@ public class Cell {
 		this.domain = new HashSet<Integer>();
 		for(int i:c.getDomain())
 			domain.add(i);	
+
     }
 	public String toString() {
 		String returned = "";
