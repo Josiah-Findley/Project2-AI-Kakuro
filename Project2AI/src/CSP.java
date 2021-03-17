@@ -126,6 +126,18 @@ public class CSP {
 			x.getHorizPosVals().remove(trasHp);
 	}
 
+	public void addNonWalls() {
+		//add all nonWalls to linked list
+		for (int row = 0; row < rowNum; row++) {
+			for (int col = 0; col < colNum; col++) {			
+				if(!board[row][col].getIsWall()){		
+					allNonWallCells.add(board[row][col]);
+				}
+			}
+		}
+		allNonWallCells.add(null); //null to signal end
+	}
+
 	/*Revise(csp, topOfQueue[0], topOfQueue[1])*/
 	public boolean AC3(Queue<Cell[]> csp){
 		while (!csp.isEmpty()) {
@@ -145,22 +157,6 @@ public class CSP {
 		}
 		return true;
 	}
-
-
-	public void addNonWalls() {
-		//add all nonWalls to linked list
-		for (int row = 0; row < rowNum; row++) {
-			for (int col = 0; col < colNum; col++) {			
-				if(!board[row][col].getIsWall()){		
-					allNonWallCells.add(board[row][col]);
-				}
-			}
-		}
-		allNonWallCells.add(null); //null to signal end
-	}
-
-
-
 
 	public boolean Revise(Cell x, Cell y) {
 		boolean revised = false;//if revised
@@ -228,61 +224,17 @@ public class CSP {
 		return revised;
 	}
 
-	public boolean BackTrackingWPartions(Cell x) {
+	public boolean BackTrackingWPartitions(Cell x) {
 		//for each value in domain
-		for(int a: x.getDomain()) {
-			boolean duplicateVal = false; //Check to see if value has been used
-			//Satified on H and V
-			boolean satisfiesHConstraints = false;	
-			boolean satisfiesVConstraints = false;	
-
-			//******Horizontal******//
-			Set<Integer> hvalues = new HashSet<Integer>();//Set of values of Horiz Neighhood
-			hvalues.add(a);//Add self
-			for(Cell y: x.getHorizNeighbors()) {//Add neighbors
-				if(y.getValue()!=0)
-					hvalues.add(y.getValue());
-				if(y.getValue()==a)
-					duplicateVal = true; //set true if already exist
-			}
-			//Set of Partitions
-			Set<Integer> targetHSet= new HashSet<Integer>();
-			//For each partition
-			for(int[] hp:x.getHorizPosVals()) {
-				targetHSet.clear();
-				for(int k: hp)
-					targetHSet.add(k);	//Change to set
-				if(targetHSet.containsAll((hvalues))) //if a partition contains the neighborhood
-					satisfiesHConstraints = true;	
-			}
-
-			//******Vertical******//
-			Set<Integer> vertValues = new HashSet<Integer>();//Set of values of Horiz Neighhood
-			vertValues.add(a);//Add self
-			for(Cell y: x.getVertNeighbors()) {//Add neighbors
-				if(y.getValue()!=0)
-					vertValues.add(y.getValue());
-				if(y.getValue()==a)
-					duplicateVal = true;//set true if already exist
-			}				
-			//Set of Partitions
-			Set<Integer> targetVSet= new HashSet<Integer>();
-			//For each partition
-			for(int[] vp:x.getVertPosVals()) {
-				targetVSet.clear();
-				for(int k: vp)
-					targetVSet.add(k);	//Change to set
-				if(targetVSet.containsAll(vertValues)) //if a partition contains the neighborhood
-					satisfiesVConstraints = true;	
-			}
-			//Grab next Cell
-			Cell nextC = allNonWallCells.get(allNonWallCells.indexOf(x)+1);
+		for(int a: x.getDomain()) {	
 			//If Constraints are met
-			if(satisfiesHConstraints&&satisfiesVConstraints&&!duplicateVal) {
+			if(checkConstraintsWPartitions(x, a) ) {
 				x.setValue(a);//Set value to a
+				//Grab next Cell
+				Cell nextC = allNonWallCells.get(allNonWallCells.indexOf(x)+1);
 				if(nextC!=null) {//If not end of board
 					//Recursion
-					if(BackTrackingWPartions(nextC))
+					if(BackTrackingWPartitions(nextC))
 						return true;//return true if solved
 				}
 				else {//If end of Board
@@ -295,68 +247,11 @@ public class CSP {
 	}
 
 	public boolean BackTracking(Cell x) {
+
 		//for each value in domain
 		for(int a: x.getDomain()) {
-			boolean duplicateVal = false; //Check to see if value has been used
-			//Satified on H and V
-			boolean satisfiesHConstraints = false;	
-			boolean satisfiesVConstraints = false;	
-
-			//******Horizontal******//
-			Set<Integer> hvalues = new HashSet<Integer>();//Set of values of Horiz Neighhood
-			hvalues.add(a);//Add self
-			for(Cell y: x.getHorizNeighbors()) {//Add neighbors
-				hvalues.add(y.getValue());
-				if(y.getValue()==a)
-					duplicateVal = true; //set true if already exist
-			}
-			//Generate sums
-			int hSum =0;
-			for(int k: x.getHorizPosVals().get(0))
-				hSum+=k;	//add to sum
-			int hValSum =0;
-			for(int k: hvalues)
-				hValSum+=k;	//add to sum
-			//If a value has a 0, then sum can be up to hSum
-			if(hvalues.contains(0)) {
-				if(hValSum<=hSum) //if a partition contains the neighborhood
-					satisfiesHConstraints = true;
-			}
-			//else sum must equal hsum
-			else {
-				if(hValSum==hSum) //if a partition contains the neighborhood
-					satisfiesHConstraints = true;
-			}
-
-			//******Vertical******//
-			Set<Integer> vertValues = new HashSet<Integer>();//Set of values of Horiz Neighhood
-			vertValues.add(a);//Add self
-			for(Cell y: x.getVertNeighbors()) {//Add neighbors
-				vertValues.add(y.getValue());
-				if(y.getValue()==a)
-					duplicateVal = true;//set true if already exist
-			}			
-			//Generate sums
-			int vSum =0;
-			for(int k: x.getVertPosVals().get(0))
-				vSum+=k;	//add to sum
-			int vValSum =0;
-			for(int k: vertValues)
-				vValSum+=k;	//add to sum
-			//If a value has a 0, then sum can be up to vSum
-			if(vertValues.contains(0)) {
-				if(vValSum<=vSum) //if a partition contains the neighborhood
-					satisfiesVConstraints = true;
-			}
-			//else sum must equal vSum
-			else {
-				if(vValSum==vSum) //if a partition contains the neighborhood
-					satisfiesVConstraints = true;
-			}
-
-
 			//If Constraints are met
-			if(satisfiesHConstraints&&satisfiesVConstraints&&!duplicateVal) {
+			if(checkConstraints(x, a)) {
 				x.setValue(a);//Set value to a
 				//Grab next Cell
 				Cell nextC = allNonWallCells.get(allNonWallCells.indexOf(x)+1);	
@@ -375,6 +270,184 @@ public class CSP {
 	}
 
 
+	public boolean BackTrackingWForwardChecking(Cell x, Set<Integer> xDom) {
+
+		for(int a: xDom) {
+			x.setValue(a);//Set value to a		
+			//If Constraints are met
+
+			if(ForwardChecking(x)) {
+				//Grab next Cell
+				Cell nextC = allNonWallCells.get(allNonWallCells.indexOf(x)+1);	
+				if(nextC!=null) {//If not end of board
+					//Recursion
+					if(BackTrackingWForwardChecking(nextC, nextC.getDomain()))
+						return true;//return true if solved
+				}
+				else {//If end of Board
+					return true;//Found solved board
+				}
+			}
+			x.setValue(0);//Reset x value during backtracking
+		}	
+
+		return false; //Else return false
+	}
+
+
+	public boolean ForwardChecking(Cell x) {
+		//Satified on H and V
+		boolean satisfiesHConstraints = false;	
+		boolean satisfiesVConstraints = false;	
+
+		if(!checkConstraints(x, x.getValue()))
+			return false;
+
+		if(x.getHorizNeighbors()!=null){
+			for(Cell c: x.getHorizNeighbors()) {
+				if(c.getValue()!=0) {
+					if(checkConstraints(c, c.getValue())) {
+						satisfiesHConstraints=true;
+					}						
+				}
+				else {
+					for(int a: c.getDomain()) {
+						if(checkConstraints(c, a)) {
+							satisfiesHConstraints=true;
+						}	
+					}	
+				}
+			}
+			//Vertical arcs
+			if(x.getVertNeighbors()!=null){
+				for(Cell c: x.getVertNeighbors()) {
+					if(c.getValue()!=0) {
+						if(checkConstraints(c, c.getValue())) {
+							satisfiesVConstraints=true;
+						}						
+					}
+					else {
+						for(int a: c.getDomain()) {
+							if(checkConstraints(c, a)) {
+								satisfiesVConstraints=true;
+							}
+						}	
+					}	
+				}
+			}
+		}
+		return satisfiesVConstraints&&satisfiesHConstraints;
+	} 
+
+
+	public boolean checkConstraintsWPartitions(Cell x, int a) {	
+		boolean duplicateVal = false; //Check to see if value has been used
+		//Satified on H and V
+		boolean satisfiesHConstraints = false;	
+		boolean satisfiesVConstraints = false;
+		
+		//******Horizontal******//
+		Set<Integer> hvalues = new HashSet<Integer>();//Set of values of Horiz Neighhood
+		hvalues.add(a);//Add self
+		for(Cell y: x.getHorizNeighbors()) {//Add neighbors
+			if(y.getValue()!=0)
+				hvalues.add(y.getValue());
+			if(y.getValue()==a)
+				duplicateVal = true; //set true if already exist
+		}
+		//Set of Partitions
+		Set<Integer> targetHSet= new HashSet<Integer>();
+		//For each partition
+		for(int[] hp:x.getHorizPosVals()) {
+			targetHSet.clear();
+			for(int k: hp)
+				targetHSet.add(k);	//Change to set
+			if(targetHSet.containsAll((hvalues))) //if a partition contains the neighborhood
+				satisfiesHConstraints = true;	
+		}
+
+		//******Vertical******//
+		Set<Integer> vertValues = new HashSet<Integer>();//Set of values of Horiz Neighhood
+		vertValues.add(a);//Add self
+		for(Cell y: x.getVertNeighbors()) {//Add neighbors
+			if(y.getValue()!=0)
+				vertValues.add(y.getValue());
+			if(y.getValue()==a)
+				duplicateVal = true;//set true if already exist
+		}				
+		//Set of Partitions
+		Set<Integer> targetVSet= new HashSet<Integer>();
+		//For each partition
+		for(int[] vp:x.getVertPosVals()) {
+			targetVSet.clear();
+			for(int k: vp)
+				targetVSet.add(k);	//Change to set
+			if(targetVSet.containsAll(vertValues)) //if a partition contains the neighborhood
+				satisfiesVConstraints = true;	
+		}
+		return satisfiesVConstraints&&satisfiesHConstraints&&!duplicateVal;
+	}
+
+	public boolean checkConstraints(Cell x, int a) {
+		boolean duplicateVal = false; //Check to see if value has been used
+		//Satified on H and V
+		boolean satisfiesHConstraints = false;	
+		boolean satisfiesVConstraints = false;	
+
+		//******Horizontal******//
+		Set<Integer> hvalues = new HashSet<Integer>();//Set of values of Horiz Neighhood
+		hvalues.add(a);//Add self
+		for(Cell y: x.getHorizNeighbors()) {//Add neighbors
+			hvalues.add(y.getValue());
+			if(y.getValue()==a)
+				duplicateVal = true; //set true if already exist
+		}
+		//Generate sums
+		int hSum =0;
+		for(int k: x.getHorizPosVals().get(0))
+			hSum+=k;	//add to sum
+		int hValSum =0;
+		for(int k: hvalues)
+			hValSum+=k;	//add to sum
+		//If a value has a 0, then sum can be up to hSum
+		if(hvalues.contains(0)) {
+			if(hValSum<=hSum) //if a partition contains the neighborhood
+				satisfiesHConstraints = true;
+		}
+		//else sum must equal hsum
+		else {
+			if(hValSum==hSum) //if a partition contains the neighborhood
+				satisfiesHConstraints = true;
+		}
+
+		//******Vertical******/
+		Set<Integer> vertValues = new HashSet<Integer>();//Set of values of Horiz Neighhood
+		vertValues.add(a);//Add self
+		for(Cell y: x.getVertNeighbors()) {//Add neighbors
+			vertValues.add(y.getValue());
+			if(y.getValue()==a)
+				duplicateVal = true;//set true if already exist
+		}			
+		//Generate sums
+		int vSum =0;
+		for(int k: x.getVertPosVals().get(0))
+			vSum+=k;	//add to sum
+		int vValSum =0;
+		for(int k: vertValues)
+			vValSum+=k;	//add to sum
+		//If a value has a 0, then sum can be up to vSum
+		if(vertValues.contains(0)) {
+			if(vValSum<=vSum) //if a partition contains the neighborhood
+				satisfiesVConstraints = true;
+		}
+		//else sum must equal vSum
+		else {
+			if(vValSum==vSum) //if a partition contains the neighborhood
+				satisfiesVConstraints = true;
+		}	
+
+		return satisfiesVConstraints&&satisfiesHConstraints&&!duplicateVal;
+	}
 
 	/**
 	 * find distinct partitions of a particular integer at a certain length
@@ -439,6 +512,22 @@ public class CSP {
 		}
 	}
 
+	
+	
+	public String toString() {
+		String returned ="";
+		for (int row = 0; row < rowNum; row++) {
+			for (int col = 0; col < colNum; col++) {
+				//Horizontal arcs
+
+				if(!board[row][col].getIsWall()){
+					returned += board[row][col].toString()+"\n";
+				}
+			}
+		}
+		return returned;	
+	}
+	
 	/*************************Getters and Setters**************************/
 
 	public Cell[][] getBoard() {
@@ -447,6 +536,8 @@ public class CSP {
 
 	public void setBoard(Cell[][] board) {
 		this.board = board;
+		
+
 	}
 
 	public int getRowNum() {
