@@ -25,13 +25,15 @@ public class Kakuro extends Application {
 
 	@Override
 	public void start(Stage primaryStage2) throws IOException {
+		int xPos = 0; //init board xPos
+		//Add boards
 		ArrayList<KakuroBoard> allBoards = new ArrayList<KakuroBoard>();
 		allBoards.add(new KakuroBoard("kakuroBoard.txt"));
 		allBoards.add(new KakuroBoard("kakuroBoard15x15.txt"));
 		allBoards.add(new KakuroBoard("kakuroBoard3.txt"));
 		allBoards.add(new KakuroBoard("kakuroBoard4.txt"));
-		allBoards.add(new KakuroBoard("kakuroBoardBad.txt"));
-
+	
+		//Solve all boards
 		for(KakuroBoard board: allBoards) {
 			board.solveKakuro();
 			//Set Variables
@@ -39,7 +41,12 @@ public class Kakuro extends Application {
 			int colNum = board.getColNum();
 			int sideLen = 30;
 
+			//Set new Stage
 			Stage primaryStage = new Stage();
+			primaryStage.setX(xPos);
+			primaryStage.setY(250-(sideLen*colNum+10)/2);
+			xPos+=sideLen*colNum+10;
+			//yPos+=sideLen*colNum+10;
 			
 			//Set scene title
 			primaryStage.setTitle("Kakuro "+rowNum+"x"+colNum);
