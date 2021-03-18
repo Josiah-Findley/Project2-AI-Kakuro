@@ -13,6 +13,8 @@ public class CSP {
 	private int rowNum;
 	private int colNum;
 	private LinkedList<Cell> allNonWallCells;
+	private int countRuns;
+	private int countRunsOfPartitions;
 
 	//Constructor
 	public CSP(Cell[][] board){
@@ -20,6 +22,8 @@ public class CSP {
 		this.rowNum = board.length;
 		this.colNum = board[0].length;
 		allNonWallCells = addNonWalls(board);//Add all nonWalls
+		countRuns = 0;
+		countRunsOfPartitions = 0;
 	}
 
 	/**
@@ -337,6 +341,7 @@ public class CSP {
 	 * @param x - the cell we want to start checking constraints on
 	 */
 	public boolean BackTracking(Cell x) {
+		countRuns++;
 		//for each value in domain
 		for(int a: x.getDomain()) {
 			//If Constraints are met
@@ -345,7 +350,7 @@ public class CSP {
 				//Grab next Cell
 				Cell nextC = allNonWallCells.get(allNonWallCells.indexOf(x)+1);	
 				if(nextC!=null) {//If not end of board
-					System.out.println(x);
+
 					//Recursion
 					if(BackTracking(nextC))
 						return true;//return true if solved
@@ -363,6 +368,7 @@ public class CSP {
 	 * @param x - the cell we want to start checking partition constraints on
 	 */
 	public boolean BackTrackingWPartitions(Cell x) {
+		countRuns++;
 		//for each value in domain
 		for(int a: x.getDomain()) {	
 			//If Constraints are met
@@ -391,6 +397,7 @@ public class CSP {
 	 * @param xDom - the initial deep copy of x's domain
 	 */
 	public boolean BackTrackingWForwardChecking(Cell x, Set<Integer> xDom) {
+		countRuns++;
 		//for each int in domain
 		for(int a: xDom) {		
 			x.getDomain().clear();
@@ -426,6 +433,7 @@ public class CSP {
 	 * @param xDom - the initial deep copy of x's domain
 	 */
 	public boolean BackTrackingWForwardCheckingWPartitions(Cell x, Set<Integer> xDom) {
+		countRuns++;
 		//for each int in domain
 		for(int a: xDom) {		
 			x.getDomain().clear();
@@ -625,33 +633,35 @@ public class CSP {
 	 * @param dcB - the initial domains of board
 	 */
 	public boolean BackTrackingAC3(Cell x, Set<Integer>[][] dcB) {
-		Set<Integer> xDom = dcB[x.getRow()][x.getCol()];//grab domain of x
-		Set<Integer> dom = new HashSet<Integer>();//make deep copy
-		for(int d: xDom)
-			dom.add(d);
-		//for each value in domain
-		for(int a: dom) {
-			xDom.clear();
-			xDom.add(a);//set xDom
-			x.setValue(a);//Set value to a	
-			Set<Integer>[][] dcBoard = deepCopy(dcB);	
-			//If Constraints are met
-			if(AC3(arcs(x), dcBoard)) {
-				//Grab next Cell
-				Cell nextC = allNonWallCells.get(allNonWallCells.indexOf(x)+1);
-				if(nextC!=null) {//If not end of board
-					//Recursion
-					if(BackTrackingAC3(nextC, dcBoard))
-						return true;//return true if solved
+		countRuns++;//Count numRuns
+		Set<Integer>[][] dcBoard = deepCopy(dcB);	
+		//If Constraints are met
+		if(AC3(arcs(x), dcBoard)) {
+			Set<Integer> xDom = dcBoard[x.getRow()][x.getCol()];//grab domain of x
+			Set<Integer> dom = new HashSet<Integer>();//make deep copy
+			for(int d: xDom)
+				dom.add(d);
+			//for each value in domain
+			for(int a: dom) {
+				xDom.clear();
+				xDom.add(a);//set xDom
+				x.setValue(a);//Set value to a	
+				if(checkConstraintsWPartitions(x,a)) {
+					//Grab next Cell
+					Cell nextC = allNonWallCells.get(allNonWallCells.indexOf(x)+1);
+					if(nextC!=null) {//If not end of board
+						//Recursion
+						if(BackTrackingAC3(nextC, dcBoard))
+							return true;//return true if solved
+					}
+					else {//If end of Board
+						return true;//Found solved board
+					}
 				}
-				else {//If end of Board
-					return true;//Found solved board
-				}
-			}
-			//reset values
-			dcBoard[x.getRow()][x.getCol()] = dcB[x.getRow()][x.getCol()];
-			x.setValue(0);
-		}	
+				//reset values
+				x.setValue(0);
+			}	
+		}
 		return false; //Else return false
 	}
 	/**
@@ -660,33 +670,35 @@ public class CSP {
 	 * @param dcB - the initial domains of board
 	 */
 	public boolean BackTrackingWForwardCheckingAC3(Cell x, Set<Integer>[][] dcB) {
-		Set<Integer> xDom = dcB[x.getRow()][x.getCol()];//grab domain of x
-		Set<Integer> dom = new HashSet<Integer>();//make deep copy
-		for(int d: xDom)
-			dom.add(d);
-		//for each value in domain
-		for(int a: dom) {
-			xDom.clear();
-			xDom.add(a);//set xDom
-			x.setValue(a);//Set value to a	
-			Set<Integer>[][] dcBoard = deepCopy(dcB);//make deep copy
-			//If Constraints are met
-			if(AC3(arcs(x), dcBoard)) {
-				//Grab next Cell
-				Cell nextC = allNonWallCells.get(allNonWallCells.indexOf(x)+1);
-				if(nextC!=null) {//If not end of board
-					//Recursion
-					if(BackTrackingWForwardCheckingAC3(nextC, dcBoard))
-						return true;//return true if solved
+		countRuns++;//Count numRuns
+		Set<Integer>[][] dcBoard = deepCopy(dcB);	
+		//If Constraints are met
+		if(AC3(arcs(x), dcBoard)) {
+			Set<Integer> xDom = dcBoard[x.getRow()][x.getCol()];//grab domain of x
+			Set<Integer> dom = new HashSet<Integer>();//make deep copy
+			for(int d: xDom)
+				dom.add(d);
+			//for each value in domain
+			for(int a: dom) {
+				xDom.clear();
+				xDom.add(a);//set xDom
+				x.setValue(a);//Set value to a	
+				if(ForwardCheckingWPartition(x)) {
+					//Grab next Cell
+					Cell nextC = allNonWallCells.get(allNonWallCells.indexOf(x)+1);
+					if(nextC!=null) {//If not end of board
+						//Recursion
+						if(BackTrackingWForwardCheckingAC3(nextC, dcBoard))
+							return true;//return true if solved
+					}
+					else {//If end of Board
+						return true;//Found solved board
+					}
 				}
-				else {//If end of Board
-					return true;//Found solved board
-				}
-			}
-			//reset values
-			dcBoard[x.getRow()][x.getCol()] = dcB[x.getRow()][x.getCol()];
-			x.setValue(0);
-		}	
+				//reset values
+				x.setValue(0);
+			}	
+		}
 		return false; //Else return false
 	}
 
@@ -898,8 +910,9 @@ public class CSP {
 	 * @param idx - track index of array we are at
 	 * @param desiredLength - length of a partition that we want
 	 */
-	static void partitions(int target, int curr, int[] array, int idx, int desiredLength, ArrayList<int[]> posValues)
-	{
+	public void partitions(int target, int curr, int[] array, int idx, int desiredLength, ArrayList<int[]> posValues)
+	{		
+		countRunsOfPartitions++;//Count numRuns
 		//store array in string to find length
 		String temp = "";
 		for (int i=0; i <= idx; i++)
@@ -953,7 +966,6 @@ public class CSP {
 	}
 
 	/*************************Getters and Setters**************************/
-	/*************************Getters and Setters**************************/
 
 	public Cell[][] getBoard() {
 		return board;
@@ -985,6 +997,22 @@ public class CSP {
 
 	public void setAllNonWallCells(LinkedList<Cell> allNonWallCells) {
 		this.allNonWallCells = allNonWallCells;
+	}
+
+	public int getCountRuns() {
+		return countRuns;
+	}
+
+	public void setCountRuns(int countRuns) {
+		this.countRuns = countRuns;
+	}
+
+	public int getCountRunsOfPartitions() {
+		return countRunsOfPartitions;
+	}
+
+	public void setCountRunsOfPartitions(int countRunsOfPartitions) {
+		this.countRunsOfPartitions = countRunsOfPartitions;
 	}
 
 }
