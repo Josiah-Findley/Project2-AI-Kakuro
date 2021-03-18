@@ -29,10 +29,11 @@ Import JavaFX errors.
 18) Our simulation should run and should see a filled in Kakuro board and output in the console.
 
 A couple things to note about our simulation.
-1) We have 5 different runs using different algorithms and they are all labeled in the console.
+1) We have 5 different runs using  6 different algorithms and they are all labeled in the console.
 2) The booleans below the lables is the board was solved.
 3) The numbers belows the booleans is the time in milliseconds.
-4) The JavaFX popup is the last solved kakuro board of the last algorithm (Back Tracking with Forwarding Checking AC3).
+4) We have the averages printed at the bottom.
+5) The JavaFX popup is the last solved kakuro board of the last algorithm (Back Tracking with Forwarding Checking AC3).
 
 
 
