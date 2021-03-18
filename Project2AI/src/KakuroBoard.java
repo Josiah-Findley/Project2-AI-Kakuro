@@ -10,9 +10,7 @@ import java.util.List;
 import java.util.Queue;
 import java.util.Scanner;
 import java.util.Set;
-
 import javafx.application.Application;
-
 
 public class KakuroBoard {
 	//data members
@@ -21,7 +19,6 @@ public class KakuroBoard {
 	private int colNum;
 	private CSP csp;
 	private String boardName = "kakuroBoard.txt";
-
 
 	/**
 	 * Constructor
@@ -35,26 +32,20 @@ public class KakuroBoard {
 		this.rowNum = boardTxt.length;
 		this.colNum = boardTxt[0].length;
 		this.csp = new CSP(board);	
-		//System.out.println(csp.toString());
-		csp.addNeighborsAndPosValues(csp.getBoard());
-
 	}
-
-
-
+	/**
+	 * Solves Kakuro Board with 6 different Alg.
+	 */
 	public void solveKakuro() throws IOException {
 		long start;
 		long finish;
 		long timeInMSecs;
 
-		csp = new CSP(board);
-		start = System.nanoTime();//Start timer
-
 		//Add and reduce Values	
-
-
-
 		//#1
+		csp = new CSP(board);
+		csp.addNeighborsAndPosValues(csp.getBoard());
+		start = System.nanoTime();//Start timer
 		System.out.println("BackTrackingSimple: ");
 		System.out.println(csp.BackTracking(csp.getAllNonWallCells().getFirst()));
 		finish = System.nanoTime();//end timer
@@ -212,13 +203,9 @@ public class KakuroBoard {
 		this.colNum = colNum;
 	}
 
-
-
 	public CSP getCsp() {
 		return csp;
 	}
-
-
 
 	public void setCsp(CSP csp) {
 		this.csp = csp;

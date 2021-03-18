@@ -38,6 +38,10 @@ public class CSP {
 		return (Set<Integer>[][]) deepCopy;
 	}
 
+	/**
+	 * grabDomains of a board
+	 * @param board - the board we want to grab domains from
+	 */
 	public Set<Integer>[][] grabDomains(Cell[][] board){
 		Set<?>[][] domains = new Set<?>[board.length][board[0].length];
 		for (int i = 0; i < board.length; i++)
@@ -129,7 +133,6 @@ public class CSP {
 			}
 		}	
 	}
-
 
 	/**
 	 * Create list of nonWalls
@@ -292,6 +295,9 @@ public class CSP {
 	/**
 	 * Trash needless partitions 
 	 */
+	/**
+	 * Remove all partitions that don't have any values in domain 
+	 */
 	public void trashPartitions(Cell x) {
 		/****Trash Partitions****/
 		//Remove all vpartitions that don't have any values in domain
@@ -325,6 +331,10 @@ public class CSP {
 			x.getHorizPosVals().remove(trasHp);
 	}
 	/*************************Simple BackTracking**************************/
+	/**
+	 * BackTracking
+	 * @param x - the cell we want to start checking constraints on
+	 */
 	public boolean BackTracking(Cell x) {
 		//for each value in domain
 		for(int a: x.getDomain()) {
@@ -346,6 +356,10 @@ public class CSP {
 		}	
 		return false; //Else return false
 	}
+	/**
+	 * BackTracking with partitions
+	 * @param x - the cell we want to start checking partition constraints on
+	 */
 	public boolean BackTrackingWPartitions(Cell x) {
 		//for each value in domain
 		for(int a: x.getDomain()) {	
@@ -369,6 +383,11 @@ public class CSP {
 	}
 
 	/*************************Forward Checking**************************/
+	/**
+	 * BackTracking with ForwardChecking 
+	 * @param x - the cell we want to start checking constraints on
+	 * @param xDom - the initial deep copy of x's domain
+	 */
 	public boolean BackTrackingWForwardChecking(Cell x, Set<Integer> xDom) {
 		//for each int in domain
 		for(int a: xDom) {		
@@ -399,6 +418,11 @@ public class CSP {
 		return false; //Else return false
 	}
 
+	/**
+	 * BackTracking with ForwardChecking with Partitions
+	 * @param x - the cell we want to start checking partition constraints on
+	 * @param xDom - the initial deep copy of x's domain
+	 */
 	public boolean BackTrackingWForwardCheckingWPartitions(Cell x, Set<Integer> xDom) {
 		//for each int in domain
 		for(int a: xDom) {		
@@ -429,6 +453,10 @@ public class CSP {
 		return false; //Else return false
 	}
 
+	/**
+	 * ForwardChecking with Backtracking
+	 * @param x - the cell we want to forward check on
+	 */
 	public boolean ForwardChecking(Cell x) {
 		//Check against self
 		if(!checkConstraints(x, x.getValue()))
@@ -506,6 +534,10 @@ public class CSP {
 
 		return true;//Return true if no problem
 	} 
+	/**
+	 * ForwardChecking with partitions
+	 * @param x - the cell we want to check partition constraints on
+	 */
 
 	public boolean ForwardCheckingWPartition(Cell x) {
 		//Check against self
@@ -584,7 +616,12 @@ public class CSP {
 		return true;//Return true if no problem
 	} 
 
-	/*************************AC3**************************/
+	/*************************BackTracking with AC3**************************/
+	/**
+	 * AC3 with Backtracking
+	 * @param x - the cell we want to start with
+	 * @param dcB - the initial domains of board
+	 */
 	public boolean BackTrackingAC3(Cell x, Set<Integer>[][] dcB) {
 		Set<Integer> xDom = dcB[x.getRow()][x.getCol()];//grab domain of x
 		Set<Integer> dom = new HashSet<Integer>();//make deep copy
@@ -615,7 +652,11 @@ public class CSP {
 		}	
 		return false; //Else return false
 	}
-
+	/**
+	 * AC3 with Backtracking and Forward Checking
+	 * @param x - the cell we want to start with
+	 * @param dcB - the initial domains of board
+	 */
 	public boolean BackTrackingWForwardCheckingAC3(Cell x, Set<Integer>[][] dcB) {
 		Set<Integer> xDom = dcB[x.getRow()][x.getCol()];//grab domain of x
 		Set<Integer> dom = new HashSet<Integer>();//make deep copy
@@ -890,6 +931,10 @@ public class CSP {
 		}
 	}
 
+	/**
+	 * toString method for board
+	 * @param board - the board we want to print
+	 */
 	/*************************toString**************************/
 	public String toString(Cell[][] board) {
 		String returned ="";
@@ -905,6 +950,7 @@ public class CSP {
 		return returned;	
 	}
 
+	/*************************Getters and Setters**************************/
 	/*************************Getters and Setters**************************/
 
 	public Cell[][] getBoard() {

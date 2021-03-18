@@ -4,8 +4,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class Cell {
-
-
 	//Data Members
 	private Boolean isWall;
 	private int value;
@@ -19,7 +17,9 @@ public class Cell {
 	private ArrayList<Cell> horizNeighbors;
 	private ArrayList<Cell> vertNeighbors;
 	
-	
+	/**
+	 * Constructor for walls
+	 */
 	public Cell(int lTvalue, int uTvalue, int row, int col) {
 		this.isWall = true;
 		this.row = row;
@@ -28,7 +28,9 @@ public class Cell {
 		this.lTvalue = lTvalue;
 	}
 	
-	//for nodes that are added by
+	/**
+	 * Constructor for nonWalls
+	 */
 	public Cell(int value, int row, int col) {
 		this.isWall = false;
 		this.value = value;
@@ -36,10 +38,12 @@ public class Cell {
 		this.col = col;
 		this.domain = new HashSet<Integer>();
 		for(int i=1;i<10;i++)
-			domain.add(i);	
-		
+			domain.add(i);		
 	}
 	
+	/**
+	 * Copy Constructor for nonWalls
+	 */
 	public Cell(Cell c) {
         this.isWall = c.isWall;
         this.value = c.value;
@@ -48,16 +52,16 @@ public class Cell {
 		this.domain = new HashSet<Integer>();
 		for(int i:c.getDomain())
 			domain.add(i);	
-
     }
+	
+	/**
+	 * To String for Cell
+	 */
 	public String toString() {
 		String returned = "";
 		returned+="("+row+","+col+"): "+domain.toString()+" : "+value;
-
 		return returned;
 	}
-	
-	
 	
 	/*************************Getters and Setters**************************/
 	public Boolean getIsWall() {
@@ -84,63 +88,46 @@ public class Cell {
 	public void setlTvalue(int lTvalue) {
 		this.lTvalue = lTvalue;
 	}
-
 	public int getRow() {
 		return row;
 	}
-
 	public void setRow(int row) {
 		this.row = row;
 	}
-
 	public int getCol() {
 		return col;
 	}
-
 	public void setCol(int col) {
 		this.col = col;
 	}
-
 	public Set<Integer> getDomain() {
 		return domain;
 	}
-
 	public void setDomain(Set<Integer> domain) {
 		this.domain = domain;
 	}
-
 	public ArrayList<int[]> getHorizPosVals() {
 		return horizPosVals;
 	}
-
 	public void setHorizPosVals(ArrayList<int[]> horizPosVals) {
 		this.horizPosVals = horizPosVals;
 	}
-
 	public ArrayList<int[]> getVertPosVals() {
 		return vertPosVals;
 	}
-
 	public void setVertPosVals(ArrayList<int[]> vertPosVals) {
 		this.vertPosVals = vertPosVals;
 	}
-
 	public ArrayList<Cell> getHorizNeighbors() {
 		return horizNeighbors;
 	}
-
 	public void setHorizNeighbors(ArrayList<Cell> horizNeighbors) {
 		this.horizNeighbors = horizNeighbors;
 	}
-
 	public ArrayList<Cell> getVertNeighbors() {
 		return vertNeighbors;
 	}
-
 	public void setVertNeighbors(ArrayList<Cell> vertNeighbors) {
 		this.vertNeighbors = vertNeighbors;
 	}
-
-
-
 }

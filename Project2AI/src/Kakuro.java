@@ -18,19 +18,17 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
  
 public class Kakuro extends Application {
-	
     public static void main(String[] args) {
         launch(args);
     }
-
-    
+ 
     @Override
     public void start(Stage primaryStage) throws IOException {
     	
+    	//Generate Board and Solve
     	KakuroBoard board = new KakuroBoard();//Grab the board
     	board.solveKakuro();
-
-    	
+   	
     	//Set Variables
     	int rowNum = board.getRowNum();
     	int colNum = board.getColNum();
@@ -46,14 +44,12 @@ public class Kakuro extends Application {
         //Create grid
         for (int row = 0; row < rowNum; row++) {
             for (int col = 0; col < colNum; col++) {
-
             	//Set up Square
                 Rectangle rec = new Rectangle(sideLen,sideLen);
                 rec.setStrokeType(StrokeType.INSIDE);
                 rec.getStyleClass().add("square");
                 StackPane stack = new StackPane();
-                
-                
+                                
                 //Grab cell
                 Cell current = board.getBoard()[row][col];
 
@@ -66,8 +62,7 @@ public class Kakuro extends Application {
                 	Text textB = new Text(" "+(current.getlTvalue()==0?"": current.getlTvalue()));
                 	textB.setScaleX(scale);
                 	textB.setScaleY(scale);
-                	
-                	
+                	         	
                 	//Add the triangles
                 	Polygon triangleU = new Polygon();
                     triangleU.getPoints().addAll((double)sideLen, 0.0,  0.0, 0.0,(double)sideLen, (double)sideLen);
@@ -88,18 +83,14 @@ public class Kakuro extends Application {
                 else {
                 	
                 	Text value = new Text((current.getValue()==0?"": current.getValue())+"");
-                	stack.getChildren().addAll(rec, value);   
-                	
+                	stack.getChildren().addAll(rec, value);    	
                 }
-
             	//add to grid
                 GridPane.setRowIndex(stack, row);
                 GridPane.setColumnIndex(stack, col);
                 grid.add(stack, col, row);//stupid col row order
-
             }
-        }
-        
+        }       
 		//Add the BorderPane to the Scene
 		Scene appScene = new Scene(grid,sideLen*colNum+10,sideLen*colNum+10);
 		//Apply style sheet
