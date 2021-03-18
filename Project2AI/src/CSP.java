@@ -98,10 +98,11 @@ public class CSP {
 
 		/**************Going Vertical***************/
 		int counterVert;
-		for (int col = 0; col < rowNum; col++) {
+		for (int col = 0; col < colNum; col++) {
 			//reindex
 			counterVert = 0;
 			while(counterVert<rowNum) {
+
 				//go until not wall
 				while(counterVert<rowNum && board[counterVert][col].getIsWall()) {
 					counterVert++;	
@@ -116,7 +117,7 @@ public class CSP {
 				ArrayList<Cell> vertNeighborhood = new ArrayList<Cell>();
 
 				//While not wall
-				while(counterVert<colNum && !board[counterVert][col].getIsWall()) {
+				while(counterVert<rowNum && !board[counterVert][col].getIsWall()) {
 					vertNeighborhood.add(board[counterVert][col]);//Add to neighborhood
 					counterVert++;					
 				}
