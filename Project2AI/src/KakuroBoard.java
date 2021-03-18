@@ -64,6 +64,7 @@ public class KakuroBoard {
 		System.out.println (timeInMSecs);
 		System.out.println();
 
+		/*
 		//#2
 		//Reset Board and CSP init vals
 		board = IO();
@@ -122,9 +123,9 @@ public class KakuroBoard {
 		finish = System.nanoTime();//end timer
 		timeInMSecs = (finish-start)/1000;
 		System.out.println (timeInMSecs);
-		System.out.println();
+		System.out.println();*/
 
-		//#6
+		/*//#6
 		//Reset Board and CSP init vals
 		board = IO();
 		csp = new CSP(board);
@@ -136,7 +137,7 @@ public class KakuroBoard {
 		finish = System.nanoTime();//end timer
 		timeInMSecs = (finish-start)/1000;
 		System.out.println (timeInMSecs);
-		System.out.println();
+		System.out.println();*/
 	}
 
 	/*************************Input parsing of files **************************/

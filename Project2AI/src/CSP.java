@@ -345,6 +345,7 @@ public class CSP {
 				//Grab next Cell
 				Cell nextC = allNonWallCells.get(allNonWallCells.indexOf(x)+1);	
 				if(nextC!=null) {//If not end of board
+					System.out.println(x);
 					//Recursion
 					if(BackTracking(nextC))
 						return true;//return true if solved
