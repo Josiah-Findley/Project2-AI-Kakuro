@@ -875,7 +875,7 @@ public class CSP {
 	 * @param length - length of a partition that we want
 	 */
 	public ArrayList<int[]> findPartitions(int value, int length) {
-		int[] array = new int [value];//hold partition, length of number we want but will never be that long
+		int[] array = new int [value];//hold partition, length can never be more than the number we are attempting to make
 
 		//Store in ArrayList of int arrays
 		ArrayList<int[]> posValues= new ArrayList<int[]>();
@@ -884,7 +884,7 @@ public class CSP {
 		for(int i = 1; i < value; i++)
 		{
 			array[0] = i;//initilize starting point        
-			partitions(value, 0, array, 0, length,posValues);        
+			partitions(value, 0, array, 0, length,posValues);//curr = 0, idx = 0    
 		}
 		return posValues;
 	}
@@ -905,18 +905,19 @@ public class CSP {
 		{
 			temp += array[i];
 		}
-		//if we have created a partion of the target and have desired length
+		//if we have created a partion of the target and have desired length (we have what we want)
 		if (curr + array[idx] == target && temp.length() == desiredLength)
 		{
+			//convert string to array
 			int[] posVal = new int[desiredLength];
 			for (int i=0; i <= idx; i++)
 			{
 				posVal[i]= array[i];
 			}
-			posValues.add(posVal);
+			posValues.add(posVal);//add this partition to possible partitions
 			return;
 		}
-		//if we have numbers that go past our target 
+		//if we have numbers that go past our target we've added to many
 		else if (curr + array[idx] > target)
 		{
 			return;
@@ -926,7 +927,7 @@ public class CSP {
 			//recursive, add next value to curr, add 1 to index, for each index of array
 			for(int i = array[idx]+1; i < 10; i++)
 			{
-				array[idx+1] = i;
+				array[idx+1] = i;//for each next index that we haven't looked at yet, add i to the index (1,1,1 -> 1,2,2 -> 1,2,3 etc)
 				partitions(target, curr + array[idx], array, idx+1, desiredLength, posValues);
 			}
 		}
