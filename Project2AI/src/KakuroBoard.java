@@ -18,39 +18,33 @@ public class KakuroBoard {
 	private int rowNum;
 	private int colNum;
 	private CSP csp;
-	private String boardName = "kakuroBoard4.txt";
+	private String boardName = "kakuroBoard15x15.txt";
+
 
 	/**
 	 * Constructor
 	 */
-	public KakuroBoard() throws IOException{
-		Cell[][] boardTxt = IO();//Grab board
-		//init values
-		this.board = boardTxt;
-		this.rowNum = boardTxt.length;
-		this.colNum = boardTxt[0].length;
-		this.csp = new CSP(board);	
-	}
-	
-	/**
-	 * Constructor
-	 */
 	public KakuroBoard(String boardtx) throws IOException{
+		boardName = boardtx;
 		Cell[][] boardTxt = IO();//Grab board
 		//init values
 		this.board = boardTxt;
 		this.rowNum = boardTxt.length;
 		this.colNum = boardTxt[0].length;
-		this.csp = new CSP(board);	
-		boardName = boardtx;
+		this.csp = new CSP(board);			
 	}
 	/**
 	 * Solves Kakuro Board with 6 different Alg.
 	 */
 	public void solveKakuro() throws IOException {
+		//vars for timing
 		long start;
 		long finish;
 		long timeInMSecs;
+		
+		//Label
+		System.out.println("************"+rowNum+"x"+colNum+"************");
+		System.out.println();
 
 		//Add and reduce Values	
 		//#1
@@ -125,20 +119,9 @@ public class KakuroBoard {
 		System.out.println (timeInMSecs+" msec");
 		System.out.println();
 
-		//#6
-		//Reset Board and CSP init vals
-		board = IO();
-		csp = new CSP(board);
-		start = System.nanoTime();//Start timer
-		csp.addNeighborsAndPosValues(csp.getBoard());
-		System.out.println("BackTrackingWForwardCheckingAC3: ");
-		Set<Integer>[][] domains2= csp.grabDomains(csp.getBoard());
-		System.out.println(csp.BackTrackingWForwardCheckingAC3(csp.getAllNonWallCells().getFirst(), domains2)+" : Loops: "+csp.getCountRuns());
-		finish = System.nanoTime();//end timer
-		timeInMSecs = (finish-start)/1000;
-		System.out.println (timeInMSecs+" msec");
+		//Number of loops for partitions
+		System.out.println("Number of Loops for Partitions: "+csp.getCountRunsOfPartitions());
 		System.out.println();
-		System.out.println("Number of Loop Partitions: "+csp.getCountRunsOfPartitions());
 	}
 
 	/*************************Input parsing of files **************************/

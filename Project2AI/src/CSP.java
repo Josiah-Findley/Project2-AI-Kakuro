@@ -664,43 +664,6 @@ public class CSP {
 		}
 		return false; //Else return false
 	}
-	/**
-	 * AC3 with Backtracking and Forward Checking
-	 * @param x - the cell we want to start with
-	 * @param dcB - the initial domains of board
-	 */
-	public boolean BackTrackingWForwardCheckingAC3(Cell x, Set<Integer>[][] dcB) {
-		countRuns++;//Count numRuns
-		Set<Integer>[][] dcBoard = deepCopy(dcB);	
-		//If Constraints are met
-		if(AC3(arcs(x), dcBoard)) {
-			Set<Integer> xDom = dcBoard[x.getRow()][x.getCol()];//grab domain of x
-			Set<Integer> dom = new HashSet<Integer>();//make deep copy
-			for(int d: xDom)
-				dom.add(d);
-			//for each value in domain
-			for(int a: dom) {
-				xDom.clear();
-				xDom.add(a);//set xDom
-				x.setValue(a);//Set value to a	
-				if(ForwardCheckingWPartition(x)) {
-					//Grab next Cell
-					Cell nextC = allNonWallCells.get(allNonWallCells.indexOf(x)+1);
-					if(nextC!=null) {//If not end of board
-						//Recursion
-						if(BackTrackingWForwardCheckingAC3(nextC, dcBoard))
-							return true;//return true if solved
-					}
-					else {//If end of Board
-						return true;//Found solved board
-					}
-				}
-				//reset values
-				x.setValue(0);
-			}	
-		}
-		return false; //Else return false
-	}
 
 	/*************************Checking Constraints**************************/
 
