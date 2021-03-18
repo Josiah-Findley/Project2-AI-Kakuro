@@ -18,7 +18,7 @@ public class KakuroBoard {
 	private int rowNum;
 	private int colNum;
 	private CSP csp;
-	private String boardName = "kakuroBoard2.txt";
+	private String boardName = "kakuroBoard4.txt";
 
 	/**
 	 * Constructor
