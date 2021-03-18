@@ -1,4 +1,4 @@
-# Kauro
+# Kakuro
 Instructions on how to run our simulation in Eclipse.
 
 1) Open the extracted .zip folder in eclipse as a workspace.
