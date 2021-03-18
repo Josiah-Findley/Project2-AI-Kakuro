@@ -25,18 +25,32 @@ public class CSP {
 	/**
 	 * Create deepCopy of Table
 	 */
-	public Cell[][] deepCopy(Cell[][] board){
-		Cell[][] deepCopy = new Cell[board.length][board[0].length];
+	public Set<Integer>[][] deepCopy(Set<Integer>[][] board){
+		Set<?>[][] deepCopy = new Set<?>[board.length][board[0].length];
 		for (int i = 0; i < deepCopy.length; i++)
 			for (int j = 0; j < deepCopy[0].length; j++)
-				if(!board[i][j].getIsWall())
-					deepCopy[i][j] = new Cell(board[i][j]);
-				else
-					deepCopy[i][j] = (board[i][j]);
-		
-		return deepCopy;
+				if(!this.board[i][j].getIsWall()) {
+					Set<Integer> dom = new HashSet<Integer>();
+					for(int d: board[i][j])
+						dom.add(d);
+					deepCopy[i][j] = dom;
+				}
+		return (Set<Integer>[][]) deepCopy;
 	}
-	
+
+	public Set<Integer>[][] grabDomains(Cell[][] board){
+		Set<?>[][] domains = new Set<?>[board.length][board[0].length];
+		for (int i = 0; i < board.length; i++)
+			for (int j = 0; j < board[0].length; j++)
+				if(!board[i][j].getIsWall()) {
+					Set<Integer> dom = new HashSet<Integer>();
+					for(int d: board[i][j].getDomain())
+						dom.add(d);
+					domains[i][j] = dom;
+				}
+		return (Set<Integer>[][]) domains;
+	}
+
 	/**
 	 * add Neighbors vert and horiz for all cells 
 	 * add Possible Values vert and horiz for all cells
@@ -117,7 +131,6 @@ public class CSP {
 	}
 
 
-
 	/**
 	 * Create list of nonWalls
 	 */
@@ -139,38 +152,38 @@ public class CSP {
 	/**
 	 * Create all Arcs 
 	 */
-	public Queue<Cell[]> arcs(Cell[][] board, Cell x) {
+	public Queue<Cell[]> arcs(Cell x) {
 		Queue<Cell[]> arcs= new LinkedList<Cell[]>();
 		//For each Cell that is not a wall add arc to queue
 
-				//Horizontal arcs
-				if(x.getHorizNeighbors()!=null){
-					for(Cell c: x.getHorizNeighbors()) {
-						Cell[] arc= new Cell[2];
-						arc[0]=x;
-						arc[1]= c;
-						arcs.add(arc);	
-					}
-				}
-				//Vertical arcs
-				if(x.getVertNeighbors()!=null){
-					for(Cell c: x.getVertNeighbors()) {
-						Cell[] arc= new Cell[2];
-						arc[0]=x;
-						arc[1]= c;
-						arcs.add(arc);	
-					}	
-				}
+		//Horizontal arcs
+		if(x.getHorizNeighbors()!=null){
+			for(Cell c: x.getHorizNeighbors()) {
+				Cell[] arc= new Cell[2];
+				arc[0]=x;
+				arc[1]= c;
+				arcs.add(arc);	
+			}
+		}
+		//Vertical arcs
+		if(x.getVertNeighbors()!=null){
+			for(Cell c: x.getVertNeighbors()) {
+				Cell[] arc= new Cell[2];
+				arc[0]=x;
+				arc[1]= c;
+				arcs.add(arc);	
+			}	
+		}
 		return arcs;
 	}
 	/**
 	 * Run AC3
 	 */
-	public boolean AC3(Queue<Cell[]> csp){
+	public boolean AC3(Queue<Cell[]> csp, Set<Integer>[][] domains){
 		while (!csp.isEmpty()) {//While queue not empty
 			Cell[] topOfQueue = csp.remove();
-			if (Revise(topOfQueue[0],topOfQueue[1])) {
-				if (topOfQueue[0].getDomain().size() == 0) 
+			if (Revise(topOfQueue[0],topOfQueue[1], domains[topOfQueue[0].getRow()][topOfQueue[0].getCol()],domains[topOfQueue[1].getRow()][topOfQueue[1].getCol()])) {
+				if (domains[topOfQueue[0].getRow()][topOfQueue[0].getCol()].size() == 0) 
 					return false;
 				//push back on stack if revision
 				if(topOfQueue[0].getHorizNeighbors()!=null)
@@ -188,7 +201,7 @@ public class CSP {
 	/**
 	 * Revise domians on two cells
 	 */
-	public boolean Revise(Cell x, Cell y) {
+	public boolean Revise(Cell x, Cell y, Set<Integer> xDomain, Set<Integer> yDomain) {
 		boolean revised = false;//if revised
 		//See if a vertical or horizontal pair
 		//for each value in domain
@@ -196,55 +209,80 @@ public class CSP {
 			/*****Vertical*****/
 			//Values to remove from domain
 			HashSet<Integer> vTrashSet = new HashSet<Integer>();
-			//For each value in x domain if there is a y value that satisfies the constraints 
-			for (int a: x.getDomain()) {
-				// values to keep in domain
-				HashSet<Integer> vSet = new HashSet<Integer>();
-				//Reset values to remove from domain
 
-				//Add all vp values
-				for(int[] vp: y.getVertPosVals()) {
-					for(int i:vp) {
-						if(!vSet.contains(i))//only if not already in 
-							vSet.add(i);
+			//For each value in x domain if there is a y value that satisfies the constraints
+			for (int a: xDomain) {
+				Set<Integer> vertValues = new HashSet<Integer>();//Set of values of Horiz Neighhood
+				//Satified on H 
+				boolean satisfiesVConstraints = false;	
+				for(int yV: yDomain) {//For each val in yDom
+					boolean duplicateVal = false; //Check to see if value has been used
+					vertValues.clear();
+					vertValues.add(a);//Add self
+					if(yV==a)
+						duplicateVal = true; //set true if already exist
+
+					vertValues.add(yV);//Add self
+					//Set of Partitions
+					Set<Integer> targetVSet= new HashSet<Integer>();
+					//For each partition
+					for(int[] hp:x.getVertPosVals()) {
+						targetVSet.clear();
+						for(int k: hp)
+							targetVSet.add(k);	//Change to set
+						if(targetVSet.containsAll((vertValues))&&!duplicateVal) //if a partition contains the neighborhood
+							satisfiesVConstraints = true;	
 					}
 				}
-				//If not satisfied 
-				if (!vSet.contains(a)) {
-					vTrashSet.add(a);	
-					revised = true;
-				}
+				//if not satisfies
+				if(!satisfiesVConstraints)
+					vTrashSet.add(a);//remove
 			}
+			//If contains int
+			if(!vTrashSet.isEmpty())
+				revised = true;//revised
 			//Remove trashed domain values
 			for(int a: vTrashSet)
-				x.getDomain().remove(a);
+				xDomain.remove(a);
+
 		}
 		/*****Horizontal*****/
 		else {
 			//Values to remove from domain
 			HashSet<Integer> hTrashSet = new HashSet<Integer>();
 			//For each value in x domain if there is a y value that satisfies the constraints
-			for (int a: x.getDomain()) {
-				// values to keep in domain
-				HashSet<Integer> hSet = new HashSet<Integer>();
-				//Reset values to remove from domain
-
-				//Add all vp values
-				for(int[] vp: y.getHorizPosVals()) {
-					for(int i:vp) {
-						if(!hSet.contains(i))//only if not already in 
-							hSet.add(i);
+			for (int a: xDomain) {
+				Set<Integer> hvalues = new HashSet<Integer>();//Set of values of Horiz Neighhood
+				//Satified on H 
+				boolean satisfiesHConstraints = false;	
+				for(int yV: yDomain) {//For each val in yDom
+					boolean duplicateVal = false; //Check to see if value has been used
+					hvalues.clear();
+					hvalues.add(a);//Add self
+					if(yV==a)
+						duplicateVal = true; //set true if already exist
+					hvalues.add(yV);//Add self
+					//Set of Partitions
+					Set<Integer> targetHSet= new HashSet<Integer>();
+					//For each partition
+					for(int[] hp:x.getHorizPosVals()) {
+						targetHSet.clear();
+						for(int k: hp)
+							targetHSet.add(k);	//Change to set
+						if(targetHSet.containsAll((hvalues))&&!duplicateVal) //if a partition contains the neighborhood
+							satisfiesHConstraints = true;	
 					}
 				}
-				//If not satisfied 
-				if (!hSet.contains(a)) {
-					hTrashSet.add(a);	
-					revised = true;
-				}
+				//if not satisfies
+				if(!satisfiesHConstraints)
+					hTrashSet.add(a);//remove
 			}
+			//If contains int
+			if(!hTrashSet.isEmpty())
+				revised = true;//revised
 			//Remove trashed domain values
 			for(int a: hTrashSet)
-				x.getDomain().remove(a);
+				xDomain.remove(a);
 		}
 
 		/****Trash Partitions****/
@@ -286,7 +324,6 @@ public class CSP {
 		for(int[] trasHp:trashHPVals)
 			x.getHorizPosVals().remove(trasHp);
 	}
-
 	/*************************Simple BackTracking**************************/
 	public boolean BackTracking(Cell x) {
 		//for each value in domain
@@ -548,68 +585,65 @@ public class CSP {
 	} 
 
 	/*************************AC3**************************/
-	public boolean BackTrackingAC3(Cell x, Cell[][] dcB) {
-		Set<Integer> dom = new HashSet<Integer>();
-		for(int d: x.getDomain())
+	public boolean BackTrackingAC3(Cell x, Set<Integer>[][] dcB) {
+		Set<Integer> xDom = dcB[x.getRow()][x.getCol()];//grab domain of x
+		Set<Integer> dom = new HashSet<Integer>();//make deep copy
+		for(int d: xDom)
 			dom.add(d);
 		//for each value in domain
 		for(int a: dom) {
-			x.getDomain().clear();
-			x.getDomain().add(a);
+			xDom.clear();
+			xDom.add(a);//set xDom
 			x.setValue(a);//Set value to a	
-			Cell[][] dcBoard = deepCopy(dcB);
-			addNeighborsAndPosValues(dcBoard);
-		//	System.out.println(toString(dcBoard));
-		//	System.out.println(dcBoard[1][4].getHorizNeighbors().get(0));
-
-			LinkedList<Cell> allNonWallC = addNonWalls(dcBoard);//Add all nonWalls
+			Set<Integer>[][] dcBoard = deepCopy(dcB);	
 			//If Constraints are met
-			if(AC3(arcs(dcBoard, dcBoard[x.getRow()][x.getCol()]))) {
-
+			if(AC3(arcs(x), dcBoard)) {
 				//Grab next Cell
-				Cell nextC = allNonWallC.get(allNonWallC.indexOf(dcBoard[x.getRow()][x.getCol()])+1);	
+				Cell nextC = allNonWallCells.get(allNonWallCells.indexOf(x)+1);
 				if(nextC!=null) {//If not end of board
 					//Recursion
 					if(BackTrackingAC3(nextC, dcBoard))
 						return true;//return true if solved
 				}
 				else {//If end of Board
-					System.out.println(toString(dcBoard));
 					return true;//Found solved board
 				}
 			}
+			//reset values
+			dcBoard[x.getRow()][x.getCol()] = dcB[x.getRow()][x.getCol()];
 			x.setValue(0);
 		}	
 		return false; //Else return false
 	}
 
-	public boolean BackTrackingWForwardCheckingAC3(Cell x, Set<Integer> xDom) {
-		//for each int in domain
-		for(int a: xDom) {		
-			x.getDomain().clear();
-			x.getDomain().add(a);
+	public boolean BackTrackingWForwardCheckingAC3(Cell x, Set<Integer>[][] dcB) {
+		Set<Integer> xDom = dcB[x.getRow()][x.getCol()];//grab domain of x
+		Set<Integer> dom = new HashSet<Integer>();//make deep copy
+		for(int d: xDom)
+			dom.add(d);
+		//for each value in domain
+		for(int a: dom) {
+			xDom.clear();
+			xDom.add(a);//set xDom
 			x.setValue(a);//Set value to a	
-			Cell[][] dcBoard = deepCopy(board);
+			Set<Integer>[][] dcBoard = deepCopy(dcB);//make deep copy
 			//If Constraints are met
-			if(AC3(arcs(dcBoard, x))) {
+			if(AC3(arcs(x), dcBoard)) {
 				//Grab next Cell
-				Cell nextC = allNonWallCells.get(allNonWallCells.indexOf(x)+1);	
+				Cell nextC = allNonWallCells.get(allNonWallCells.indexOf(x)+1);
 				if(nextC!=null) {//If not end of board
 					//Recursion
-					Set<Integer> dom = new HashSet<Integer>();
-					for(int d: nextC.getDomain())
-						dom.add(d);
-					if(BackTrackingWForwardCheckingAC3(nextC, dom))
+					if(BackTrackingWForwardCheckingAC3(nextC, dcBoard))
 						return true;//return true if solved
 				}
 				else {//If end of Board
 					return true;//Found solved board
 				}
 			}
-			x.setValue(0);//Reset x value during backtracking
+			//reset values
+			dcBoard[x.getRow()][x.getCol()] = dcB[x.getRow()][x.getCol()];
+			x.setValue(0);
 		}	
-		x.setDomain(xDom);
-
 		return false; //Else return false
 	}
 
