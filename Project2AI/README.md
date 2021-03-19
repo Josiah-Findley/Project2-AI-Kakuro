@@ -26,14 +26,12 @@ Import JavaFX errors.
  --module-path "the file path of your JavaFX jars to the lib level, the file path between quotation marks --add-modules javafx.controls,javafx.fxml
  
 17) Click Apply and then Run.
-18) Our simulation should run and should see a filled in Kakuro board and output in the console.
+18) Our simulation should run and should see 5 filled in Kakuro boards and output in the console.
 
 A couple things to note about our simulation.
-1) We have 5 different runs using  6 different algorithms and they are all labeled in the console.
-2) The booleans below the lables is the board was solved.
-3) The numbers belows the booleans is the time in milliseconds.
-4) We have the averages printed at the bottom.
-5) The JavaFX popup is the last solved kakuro board of the last algorithm (Back Tracking with Forwarding Checking AC3).
+1) We have 4 different board (15x15, 5x5, 13x13, 11x11) with 5 different algorithms run on each.
+2) We also have a boolean make sure we reach a solution and the amount of loops.
+3) And lastly under each board we have the average times for each algorithm in milllseconds.
 
 
 
