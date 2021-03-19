@@ -143,9 +143,9 @@ public class KakuroBoard {
 		for(int i = 0; i < 5; i++)
 		{
 			avgs[i] = avgs[i]/numRuns;
-			System.out.println("Average for " + names[i] + ": "+ avgs[i]+" mSec");
+			System.out.printf("Average: %7d mSec  (%s)\n",avgs[i],names[i]);
 		}
-		System.out.println();
+		System.out.println("\n");
 	}
 
 	/*************************Input parsing of files **************************/

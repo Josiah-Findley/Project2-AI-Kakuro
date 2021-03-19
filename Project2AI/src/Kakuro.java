@@ -27,11 +27,11 @@ public class Kakuro extends Application {
 	public void start(Stage primaryStage2) throws IOException {
 		int xPos = 0; //init board xPos
 		//Add boards
-		ArrayList<KakuroBoard> allBoards = new ArrayList<KakuroBoard>();
-		allBoards.add(new KakuroBoard("kakuroBoard.txt"));
+		ArrayList<KakuroBoard> allBoards = new ArrayList<KakuroBoard>();		
 		allBoards.add(new KakuroBoard("kakuroBoard15x15.txt"));
 		allBoards.add(new KakuroBoard("kakuroBoard3.txt"));
 		allBoards.add(new KakuroBoard("kakuroBoard4.txt"));
+		allBoards.add(new KakuroBoard("kakuroBoard.txt"));
 	
 		//Solve all boards
 		for(KakuroBoard board: allBoards) {
