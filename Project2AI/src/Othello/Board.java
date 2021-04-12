@@ -31,10 +31,11 @@ public class Board {
 	   public void printBoard(int turn) {
 	        int numBlacks = 0;
 	        int numWhites = 0;
+	        char[] topLabel = {'A','B','C','D','E','F','G','H'};
 	        System.out.println();
 	        System.out.printf("   ");
 	        for (int i = 0; i < boardSize; i++) {
-	            System.out.printf(" " + i + "  ");
+	            System.out.printf(" " + topLabel[i] + "  ");
 	        }
 	        System.out.printf("\n  ");
 	        for (int i = 0; i < boardSize; i++) {
@@ -66,8 +67,7 @@ public class Board {
 	 
 	        }
 	        System.out.println("Black: " + numBlacks + " - " + "White: " + numWhites);
-	        System.out.println();
-	 
+	        System.out.println(); 
 	    }
 	
 	   
