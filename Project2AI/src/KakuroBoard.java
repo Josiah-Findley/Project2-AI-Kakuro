@@ -18,8 +18,7 @@ public class KakuroBoard {
 	private int rowNum;
 	private int colNum;
 	private CSP csp;
-	private String boardName = "kakuroBoard15x15.txt";
-
+	private String boardName;
 
 	/**
 	 * Constructor
@@ -43,13 +42,13 @@ public class KakuroBoard {
 		long timeInMSecs;
 		boolean passed = false;
 		long numRuns = 5;//number of times board is run
-		long [] avgs = {0,0,0,0,0};
+		long [] avgs = {0,0,0,0,0,0};
 		//names of Algorithms
-		String [] names = {"BackTrackingSimple","BackTrackingWPartitions","BackTrackingAC3", "BackTrackingWForwardChecking","BackTrackingWForwardCheckingWPartitions"};
-
+		String [] names = {"BackTrackingSimple","BackTrackingWPartitions","BackTrackingAC3", 
+				"BackTrackingWForwardChecking","BackTrackingWForwardCheckingWPartitions"};
 		//label
 		System.out.println("********"+rowNum+"x"+colNum+"********");	
-		
+
 		//Add and redduce Values	
 		//#1
 		for(int i = 0; i < numRuns; i++)
@@ -133,7 +132,7 @@ public class KakuroBoard {
 			avgs[4] += timeInMSecs;//add ith time to tracker
 		}
 		System.out.println("BackTrackingWForwardCheckingWPartitions: "+passed+" : Loops: "+csp.getCountRuns());
-		
+
 		//Number of loops for partitions
 		System.out.println("Number of Loops for Partitions: "+csp.getCountRunsOfPartitions());
 

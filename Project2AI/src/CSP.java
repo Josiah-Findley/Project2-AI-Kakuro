@@ -335,648 +335,648 @@ public class CSP {
 		for(int[] trasHp:trashHPVals)
 			x.getHorizPosVals().remove(trasHp);
 	}
-	/*************************Simple BackTracking**************************/
-	/**
-	 * BackTracking
-	 * @param x - the cell we want to start checking constraints on
-	 */
-	public boolean BackTracking(Cell x) {
-		countRuns++;
-		//for each value in domain
-		for(int a: x.getDomain()) {
-			//If Constraints are met
-			if(checkConstraints(x, a)) {
-				x.setValue(a);//Set value to a
-				//Grab next Cell
-				Cell nextC = allNonWallCells.get(allNonWallCells.indexOf(x)+1);	
-				if(nextC!=null) {//If not end of board
-
-					//Recursion
-					if(BackTracking(nextC))
-						return true;//return true if solved
-				}
-				else {//If end of Board
-					return true;//Found solved board
-				}
+	
+/*************************Simple BackTracking**************************/
+/**
+ * BackTracking
+ * @param x - the cell we want to start checking constraints on
+ */
+public boolean BackTracking(Cell x) {
+	countRuns++;
+	//for each value in domain
+	for(int a: x.getDomain()) {
+		//If Constraints are met
+		if(checkConstraints(x, a)) {
+			x.setValue(a);//Set value to a
+			//Grab next Cell
+			Cell nextC = allNonWallCells.get(allNonWallCells.indexOf(x)+1);	
+			if(nextC!=null) {//If not end of board
+				//Recursion
+				if(BackTracking(nextC))
+					return true;//return true if solved
 			}
-			x.setValue(0);//Reset x value during backtracking
-		}	
-		return false; //Else return false
+			else {//If end of Board
+				return true;//Found solved board
+			}
+		}
+		x.setValue(0);//Reset x value during backtracking
+	}	
+	return false; //Else return false
+}
+/**
+ * BackTracking with partitions
+ * @param x - the cell we want to start checking partition constraints on
+ */
+public boolean BackTrackingWPartitions(Cell x) {
+	countRuns++;
+	//for each value in domain
+	for(int a: x.getDomain()) {	
+		//If Constraints are met
+		if(checkConstraintsWPartitions(x, a) ) {
+			x.setValue(a);//Set value to a
+			//Grab next Cell
+			Cell nextC = allNonWallCells.get(allNonWallCells.indexOf(x)+1);
+			if(nextC!=null) {//If not end of board
+				//Recursion
+				if(BackTrackingWPartitions(nextC))
+					return true;//return true if solved
+			}
+			else {//If end of Board
+				return true;//Found solved board
+			}
+		}
+		x.setValue(0);//Reset x value during backtracking
+	}	
+	return false; //Else return false
+}
+
+/*************************Forward Checking**************************/
+/**
+ * BackTracking with ForwardChecking 
+ * @param x - the cell we want to start checking constraints on
+ * @param xDom - the initial deep copy of x's domain
+ */
+public boolean BackTrackingWForwardChecking(Cell x, Set<Integer> xDom) {
+	countRuns++;
+	//for each int in domain
+	for(int a: xDom) {		
+		x.getDomain().clear();
+		x.getDomain().add(a);
+		x.setValue(a);//Set value to a		
+
+		//If Constraints are met
+		if(ForwardChecking(x)) {
+			//Grab next Cell
+			Cell nextC = allNonWallCells.get(allNonWallCells.indexOf(x)+1);	
+			if(nextC!=null) {//If not end of board
+				//Recursion
+				Set<Integer> dom = new HashSet<Integer>();
+				for(int d: nextC.getDomain())
+					dom.add(d);
+				if(BackTrackingWForwardChecking(nextC, dom))
+					return true;//return true if solved
+			}
+			else {//If end of Board
+				return true;//Found solved board
+			}
+		}
+		x.setValue(0);//Reset x value during backtracking
+	}	
+	x.setDomain(xDom);
+
+	return false; //Else return false
+}
+
+/**
+ * BackTracking with ForwardChecking with Partitions
+ * @param x - the cell we want to start checking partition constraints on
+ * @param xDom - the initial deep copy of x's domain
+ */
+public boolean BackTrackingWForwardCheckingWPartitions(Cell x, Set<Integer> xDom) {
+	countRuns++;
+	//for each int in domain
+	for(int a: xDom) {		
+		x.getDomain().clear();
+		x.getDomain().add(a);
+		x.setValue(a);//Set value to a		
+
+		//If Constraints are met
+		if(ForwardCheckingWPartition(x)) {
+			//Grab next Cell
+			Cell nextC = allNonWallCells.get(allNonWallCells.indexOf(x)+1);	
+			if(nextC!=null) {//If not end of board
+				//Recursion
+				Set<Integer> dom = new HashSet<Integer>();
+				for(int d: nextC.getDomain())
+					dom.add(d);
+				if(BackTrackingWForwardCheckingWPartitions(nextC, dom))
+					return true;//return true if solved
+			}
+			else {//If end of Board
+				return true;//Found solved board
+			}
+		}
+		x.setValue(0);//Reset x value during backtracking
+	}	
+	x.setDomain(xDom);
+
+	return false; //Else return false
+}
+
+/**
+ * ForwardChecking with Backtracking
+ * @param x - the cell we want to forward check on
+ */
+public boolean ForwardChecking(Cell x) {
+	//Check against self
+	if(!checkConstraints(x, x.getValue()))
+		return false;
+
+	// Check H neighbors
+	if(x.getHorizNeighbors()!=null){
+		for(Cell c: x.getHorizNeighbors()) {
+			boolean satisfiesH = false;
+			//Deep Copy of domain
+			HashSet<Integer> copyDom = new HashSet<Integer>();
+			for(int n: c.getDomain())
+				copyDom.add(n);
+			//if val set
+			if(c.getValue()!=0) {
+				if(checkHConstraints(c, c.getValue())) {
+					satisfiesH=true;
+				}						
+			}
+			//If value not set
+			else {
+				for(int a: c.getDomain()) {	//go through domain
+					if(checkHConstraints(c, a)) {//check constraints
+						satisfiesH=true;
+					}
+					else {//remove if const not satisfied
+						copyDom.remove(a);
+					}
+				}	
+				//if dom is empty return false
+				if(copyDom.size()==0) {
+					return false;
+				}
+			}	
+			//If one neighbor doesn't satisfy return false
+			if(!satisfiesH)
+				return false;
+		}
 	}
-	/**
-	 * BackTracking with partitions
-	 * @param x - the cell we want to start checking partition constraints on
-	 */
-	public boolean BackTrackingWPartitions(Cell x) {
-		countRuns++;
+	// Check V neighbors
+	if(x.getVertNeighbors()!=null){
+
+		for(Cell c: x.getVertNeighbors()) {		
+			boolean satisfiesV = false;
+			//Deep Copy of domain
+			HashSet<Integer> copyDom = new HashSet<Integer>();
+			for(int n: c.getDomain())
+				copyDom.add(n);
+			//If val set
+			if(c.getValue()!=0) {
+				if(checkVConstraints(c, c.getValue())) {
+					satisfiesV=true;
+				}			
+			}
+			//If value not set
+			else {
+				for(int a: c.getDomain()) {	//go through domain
+					if(checkVConstraints(c, a)) {//check constraints
+						satisfiesV=true;
+					}
+					else {//remove if const not satisfied
+						copyDom.remove(a);
+					}
+				}	
+				//if dom is empty return false
+				if(copyDom.size()==0) {
+					return false;
+				}
+			}	
+			//If one neighbor doesn't satisfy return false
+			if(!satisfiesV)
+				return false;
+		}
+	}
+
+	return true;//Return true if no problem
+} 
+/**
+ * ForwardChecking with partitions
+ * @param x - the cell we want to check partition constraints on
+ */
+
+public boolean ForwardCheckingWPartition(Cell x) {
+	//Check against self
+	if(!checkConstraints(x, x.getValue()))
+		return false;
+
+	// Check H neighbors
+	if(x.getHorizNeighbors()!=null){
+		for(Cell c: x.getHorizNeighbors()) {
+			boolean satisfiesH = false;
+			//Deep Copy of domain
+			HashSet<Integer> copyDom = new HashSet<Integer>();
+			for(int n: c.getDomain())
+				copyDom.add(n);
+			//if val set
+			if(c.getValue()!=0) {
+				if(checkHConstraintsWPartitions(c, c.getValue())) {
+					satisfiesH=true;
+				}						
+			}
+			//If value not set
+			else {
+				for(int a: c.getDomain()) {	//go through domain
+					if(checkHConstraintsWPartitions(c, a)) {//check constraints
+						satisfiesH=true;
+					}
+					else {//remove if const not satisfied
+						copyDom.remove(a);
+					}
+				}	
+				//if dom is empty return false
+				if(copyDom.size()==0) {
+					return false;
+				}
+			}	
+			//If one neighbor doesn't satisfy return false
+			if(!satisfiesH)
+				return false;
+		}
+	}
+	// Check V neighbors
+	if(x.getVertNeighbors()!=null){
+		for(Cell c: x.getVertNeighbors()) {		
+			boolean satisfiesV = false;
+			//Deep Copy of domain
+			HashSet<Integer> copyDom = new HashSet<Integer>();
+			for(int n: c.getDomain())
+				copyDom.add(n);
+			//If val set
+			if(c.getValue()!=0) {
+				if(checkVConstraintsWPartitions(c, c.getValue())) {
+					satisfiesV=true;
+				}			
+			}
+			//If value not set
+			else {
+				for(int a: c.getDomain()) {	//go through domain
+					if(checkVConstraintsWPartitions(c, a)) {//check constraints
+						satisfiesV=true;
+					}
+					else {//remove if const not satisfied
+						copyDom.remove(a);
+					}
+				}	
+				//if dom is empty return false
+				if(copyDom.size()==0) {
+					return false;
+				}
+			}	
+			//If one neighbor doesn't satisfy return false
+			if(!satisfiesV)
+				return false;
+		}
+
+	}
+	return true;//Return true if no problem
+} 
+
+/*************************BackTracking with AC3**************************/
+/**
+ * AC3 with Backtracking
+ * @param x - the cell we want to start with
+ * @param dcB - the initial domains of board
+ */
+public boolean BackTrackingAC3(Cell x, Set<Integer>[][] dcB) {
+	countRuns++;//Count numRuns
+	Set<Integer>[][] dcBoard = deepCopy(dcB);	
+	//If Constraints are met
+	if(AC3(arcs(x), dcBoard)) {
+		Set<Integer> xDom = dcBoard[x.getRow()][x.getCol()];//grab domain of x
+		Set<Integer> dom = new HashSet<Integer>();//make deep copy
+		for(int d: xDom)
+			dom.add(d);
 		//for each value in domain
-		for(int a: x.getDomain()) {	
-			//If Constraints are met
-			if(checkConstraintsWPartitions(x, a) ) {
-				x.setValue(a);//Set value to a
+		for(int a: dom) {
+			xDom.clear();
+			xDom.add(a);//set xDom
+			x.setValue(a);//Set value to a	
+			if(checkConstraintsWPartitions(x,a)) {
 				//Grab next Cell
 				Cell nextC = allNonWallCells.get(allNonWallCells.indexOf(x)+1);
 				if(nextC!=null) {//If not end of board
 					//Recursion
-					if(BackTrackingWPartitions(nextC))
+					if(BackTrackingAC3(nextC, dcBoard))
 						return true;//return true if solved
 				}
 				else {//If end of Board
 					return true;//Found solved board
 				}
 			}
-			x.setValue(0);//Reset x value during backtracking
+			//reset values
+			x.setValue(0);
 		}	
-		return false; //Else return false
 	}
+	return false; //Else return false
+}
 
-	/*************************Forward Checking**************************/
-	/**
-	 * BackTracking with ForwardChecking 
-	 * @param x - the cell we want to start checking constraints on
-	 * @param xDom - the initial deep copy of x's domain
-	 */
-	public boolean BackTrackingWForwardChecking(Cell x, Set<Integer> xDom) {
-		countRuns++;
-		//for each int in domain
-		for(int a: xDom) {		
-			x.getDomain().clear();
-			x.getDomain().add(a);
-			x.setValue(a);//Set value to a		
+/*************************Checking Constraints**************************/
 
-			//If Constraints are met
-			if(ForwardChecking(x)) {
-				//Grab next Cell
-				Cell nextC = allNonWallCells.get(allNonWallCells.indexOf(x)+1);	
-				if(nextC!=null) {//If not end of board
-					//Recursion
-					Set<Integer> dom = new HashSet<Integer>();
-					for(int d: nextC.getDomain())
-						dom.add(d);
-					if(BackTrackingWForwardChecking(nextC, dom))
-						return true;//return true if solved
-				}
-				else {//If end of Board
-					return true;//Found solved board
-				}
-			}
-			x.setValue(0);//Reset x value during backtracking
-		}	
-		x.setDomain(xDom);
+/**
+ * find distinct partitions of a particular integer at a certain length
+ * @param x - the cell we want to check constraints of
+ * @param a - the value for x that we are checking constraints for
+ */
+public boolean checkHConstraintsWPartitions(Cell x, int a) {
+	boolean duplicateVal = false; //Check to see if value has been used
+	//Satified on H and V
+	boolean satisfiesHConstraints = false;	
 
-		return false; //Else return false
+	//******Horizontal******//
+	Set<Integer> hvalues = new HashSet<Integer>();//Set of values of Horiz Neighhood
+	hvalues.add(a);//Add self
+	for(Cell y: x.getHorizNeighbors()) {//Add neighbors
+		if(y.getValue()!=0)
+			hvalues.add(y.getValue());
+		if(y.getValue()==a)
+			duplicateVal = true; //set true if already exist
 	}
-
-	/**
-	 * BackTracking with ForwardChecking with Partitions
-	 * @param x - the cell we want to start checking partition constraints on
-	 * @param xDom - the initial deep copy of x's domain
-	 */
-	public boolean BackTrackingWForwardCheckingWPartitions(Cell x, Set<Integer> xDom) {
-		countRuns++;
-		//for each int in domain
-		for(int a: xDom) {		
-			x.getDomain().clear();
-			x.getDomain().add(a);
-			x.setValue(a);//Set value to a		
-
-			//If Constraints are met
-			if(ForwardCheckingWPartition(x)) {
-				//Grab next Cell
-				Cell nextC = allNonWallCells.get(allNonWallCells.indexOf(x)+1);	
-				if(nextC!=null) {//If not end of board
-					//Recursion
-					Set<Integer> dom = new HashSet<Integer>();
-					for(int d: nextC.getDomain())
-						dom.add(d);
-					if(BackTrackingWForwardCheckingWPartitions(nextC, dom))
-						return true;//return true if solved
-				}
-				else {//If end of Board
-					return true;//Found solved board
-				}
-			}
-			x.setValue(0);//Reset x value during backtracking
-		}	
-		x.setDomain(xDom);
-
-		return false; //Else return false
+	//Set of Partitions
+	Set<Integer> targetHSet= new HashSet<Integer>();
+	//For each partition
+	for(int[] hp:x.getHorizPosVals()) {
+		targetHSet.clear();
+		for(int k: hp)
+			targetHSet.add(k);	//Change to set
+		if(targetHSet.containsAll((hvalues))) //if a partition contains the neighborhood
+			satisfiesHConstraints = true;	
 	}
+	return satisfiesHConstraints&&!duplicateVal;
 
-	/**
-	 * ForwardChecking with Backtracking
-	 * @param x - the cell we want to forward check on
-	 */
-	public boolean ForwardChecking(Cell x) {
-		//Check against self
-		if(!checkConstraints(x, x.getValue()))
-			return false;
+}
+/**
+ * find distinct partitions of a particular integer at a certain length
+ * @param x - the cell we want to check constraints of
+ * @param a - the value for x that we are checking constraints for
+ */
+public boolean checkConstraintsWPartitions(Cell x, int a) {
+	return checkHConstraintsWPartitions(x,a)&&checkVConstraintsWPartitions(x,a);
 
-		// Check H neighbors
-		if(x.getHorizNeighbors()!=null){
-			for(Cell c: x.getHorizNeighbors()) {
-				boolean satisfiesH = false;
-				//Deep Copy of domain
-				HashSet<Integer> copyDom = new HashSet<Integer>();
-				for(int n: c.getDomain())
-					copyDom.add(n);
-				//if val set
-				if(c.getValue()!=0) {
-					if(checkHConstraints(c, c.getValue())) {
-						satisfiesH=true;
-					}						
-				}
-				//If value not set
-				else {
-					for(int a: c.getDomain()) {	//go through domain
-						if(checkHConstraints(c, a)) {//check constraints
-							satisfiesH=true;
-						}
-						else {//remove if const not satisfied
-							copyDom.remove(a);
-						}
-					}	
-					//if dom is empty return false
-					if(copyDom.size()==0) {
-						return false;
-					}
-				}	
-				//If one neighbor doesn't satisfy return false
-				if(!satisfiesH)
-					return false;
-			}
-		}
-		// Check V neighbors
-		if(x.getVertNeighbors()!=null){
+}
+/**
+ * find distinct partitions of a particular integer at a certain length
+ * @param x - the cell we want to check constraints of
+ * @param a - the value for x that we are checking constraints for
+ */
+public boolean checkVConstraintsWPartitions(Cell x, int a) {	
+	boolean duplicateVal = false; //Check to see if value has been used
+	//Satified on H and V	
+	boolean satisfiesVConstraints = false;
 
-			for(Cell c: x.getVertNeighbors()) {		
-				boolean satisfiesV = false;
-				//Deep Copy of domain
-				HashSet<Integer> copyDom = new HashSet<Integer>();
-				for(int n: c.getDomain())
-					copyDom.add(n);
-				//If val set
-				if(c.getValue()!=0) {
-					if(checkVConstraints(c, c.getValue())) {
-						satisfiesV=true;
-					}			
-				}
-				//If value not set
-				else {
-					for(int a: c.getDomain()) {	//go through domain
-						if(checkVConstraints(c, a)) {//check constraints
-							satisfiesV=true;
-						}
-						else {//remove if const not satisfied
-							copyDom.remove(a);
-						}
-					}	
-					//if dom is empty return false
-					if(copyDom.size()==0) {
-						return false;
-					}
-				}	
-				//If one neighbor doesn't satisfy return false
-				if(!satisfiesV)
-					return false;
-			}
-		}
-
-		return true;//Return true if no problem
-	} 
-	/**
-	 * ForwardChecking with partitions
-	 * @param x - the cell we want to check partition constraints on
-	 */
-
-	public boolean ForwardCheckingWPartition(Cell x) {
-		//Check against self
-		if(!checkConstraints(x, x.getValue()))
-			return false;
-
-		// Check H neighbors
-		if(x.getHorizNeighbors()!=null){
-			for(Cell c: x.getHorizNeighbors()) {
-				boolean satisfiesH = false;
-				//Deep Copy of domain
-				HashSet<Integer> copyDom = new HashSet<Integer>();
-				for(int n: c.getDomain())
-					copyDom.add(n);
-				//if val set
-				if(c.getValue()!=0) {
-					if(checkHConstraintsWPartitions(c, c.getValue())) {
-						satisfiesH=true;
-					}						
-				}
-				//If value not set
-				else {
-					for(int a: c.getDomain()) {	//go through domain
-						if(checkHConstraintsWPartitions(c, a)) {//check constraints
-							satisfiesH=true;
-						}
-						else {//remove if const not satisfied
-							copyDom.remove(a);
-						}
-					}	
-					//if dom is empty return false
-					if(copyDom.size()==0) {
-						return false;
-					}
-				}	
-				//If one neighbor doesn't satisfy return false
-				if(!satisfiesH)
-					return false;
-			}
-		}
-		// Check V neighbors
-		if(x.getVertNeighbors()!=null){
-			for(Cell c: x.getVertNeighbors()) {		
-				boolean satisfiesV = false;
-				//Deep Copy of domain
-				HashSet<Integer> copyDom = new HashSet<Integer>();
-				for(int n: c.getDomain())
-					copyDom.add(n);
-				//If val set
-				if(c.getValue()!=0) {
-					if(checkVConstraintsWPartitions(c, c.getValue())) {
-						satisfiesV=true;
-					}			
-				}
-				//If value not set
-				else {
-					for(int a: c.getDomain()) {	//go through domain
-						if(checkVConstraintsWPartitions(c, a)) {//check constraints
-							satisfiesV=true;
-						}
-						else {//remove if const not satisfied
-							copyDom.remove(a);
-						}
-					}	
-					//if dom is empty return false
-					if(copyDom.size()==0) {
-						return false;
-					}
-				}	
-				//If one neighbor doesn't satisfy return false
-				if(!satisfiesV)
-					return false;
-			}
-
-		}
-		return true;//Return true if no problem
-	} 
-
-	/*************************BackTracking with AC3**************************/
-	/**
-	 * AC3 with Backtracking
-	 * @param x - the cell we want to start with
-	 * @param dcB - the initial domains of board
-	 */
-	public boolean BackTrackingAC3(Cell x, Set<Integer>[][] dcB) {
-		countRuns++;//Count numRuns
-		Set<Integer>[][] dcBoard = deepCopy(dcB);	
-		//If Constraints are met
-		if(AC3(arcs(x), dcBoard)) {
-			Set<Integer> xDom = dcBoard[x.getRow()][x.getCol()];//grab domain of x
-			Set<Integer> dom = new HashSet<Integer>();//make deep copy
-			for(int d: xDom)
-				dom.add(d);
-			//for each value in domain
-			for(int a: dom) {
-				xDom.clear();
-				xDom.add(a);//set xDom
-				x.setValue(a);//Set value to a	
-				if(checkConstraintsWPartitions(x,a)) {
-					//Grab next Cell
-					Cell nextC = allNonWallCells.get(allNonWallCells.indexOf(x)+1);
-					if(nextC!=null) {//If not end of board
-						//Recursion
-						if(BackTrackingAC3(nextC, dcBoard))
-							return true;//return true if solved
-					}
-					else {//If end of Board
-						return true;//Found solved board
-					}
-				}
-				//reset values
-				x.setValue(0);
-			}	
-		}
-		return false; //Else return false
+	//******Vertical******//
+	Set<Integer> vertValues = new HashSet<Integer>();//Set of values of Horiz Neighhood
+	vertValues.add(a);//Add self
+	for(Cell y: x.getVertNeighbors()) {//Add neighbors
+		if(y.getValue()!=0)
+			vertValues.add(y.getValue());
+		if(y.getValue()==a)
+			duplicateVal = true;//set true if already exist
+	}				
+	//Set of Partitions
+	Set<Integer> targetVSet= new HashSet<Integer>();
+	//For each partition
+	for(int[] vp:x.getVertPosVals()) {
+		targetVSet.clear();
+		for(int k: vp)
+			targetVSet.add(k);	//Change to set
+		if(targetVSet.containsAll(vertValues)) //if a partition contains the neighborhood
+			satisfiesVConstraints = true;	
 	}
+	return satisfiesVConstraints&&!duplicateVal;
+}
+/**
+ * find distinct partitions of a particular integer at a certain length
+ * @param x - the cell we want to check constraints of
+ * @param a - the value for x that we are checking constraints for
+ */
+public boolean checkHConstraints(Cell x, int a) {
+	boolean duplicateVal = false; //Check to see if value has been used
+	//Satified on H 
+	boolean satisfiesHConstraints = false;	
 
-	/*************************Checking Constraints**************************/
-
-	/**
-	 * find distinct partitions of a particular integer at a certain length
-	 * @param x - the cell we want to check constraints of
-	 * @param a - the value for x that we are checking constraints for
-	 */
-	public boolean checkHConstraintsWPartitions(Cell x, int a) {
-		boolean duplicateVal = false; //Check to see if value has been used
-		//Satified on H and V
-		boolean satisfiesHConstraints = false;	
-
-		//******Horizontal******//
-		Set<Integer> hvalues = new HashSet<Integer>();//Set of values of Horiz Neighhood
-		hvalues.add(a);//Add self
+	//******Horizontal******//
+	Set<Integer> hvalues = new HashSet<Integer>();//Set of values of Horiz Neighhood
+	hvalues.add(a);//Add self
+	if(x.getHorizNeighbors()!=null) { 
 		for(Cell y: x.getHorizNeighbors()) {//Add neighbors
-			if(y.getValue()!=0)
-				hvalues.add(y.getValue());
+			hvalues.add(y.getValue());
 			if(y.getValue()==a)
 				duplicateVal = true; //set true if already exist
 		}
-		//Set of Partitions
-		Set<Integer> targetHSet= new HashSet<Integer>();
-		//For each partition
-		for(int[] hp:x.getHorizPosVals()) {
-			targetHSet.clear();
-			for(int k: hp)
-				targetHSet.add(k);	//Change to set
-			if(targetHSet.containsAll((hvalues))) //if a partition contains the neighborhood
-				satisfiesHConstraints = true;	
-		}
-		return satisfiesHConstraints&&!duplicateVal;
-
-	}
-	/**
-	 * find distinct partitions of a particular integer at a certain length
-	 * @param x - the cell we want to check constraints of
-	 * @param a - the value for x that we are checking constraints for
-	 */
-	public boolean checkConstraintsWPartitions(Cell x, int a) {
-		return checkHConstraintsWPartitions(x,a)&&checkVConstraintsWPartitions(x,a);
-
-	}
-	/**
-	 * find distinct partitions of a particular integer at a certain length
-	 * @param x - the cell we want to check constraints of
-	 * @param a - the value for x that we are checking constraints for
-	 */
-	public boolean checkVConstraintsWPartitions(Cell x, int a) {	
-		boolean duplicateVal = false; //Check to see if value has been used
-		//Satified on H and V	
-		boolean satisfiesVConstraints = false;
-
-		//******Vertical******//
-		Set<Integer> vertValues = new HashSet<Integer>();//Set of values of Horiz Neighhood
-		vertValues.add(a);//Add self
-		for(Cell y: x.getVertNeighbors()) {//Add neighbors
-			if(y.getValue()!=0)
-				vertValues.add(y.getValue());
-			if(y.getValue()==a)
-				duplicateVal = true;//set true if already exist
-		}				
-		//Set of Partitions
-		Set<Integer> targetVSet= new HashSet<Integer>();
-		//For each partition
-		for(int[] vp:x.getVertPosVals()) {
-			targetVSet.clear();
-			for(int k: vp)
-				targetVSet.add(k);	//Change to set
-			if(targetVSet.containsAll(vertValues)) //if a partition contains the neighborhood
-				satisfiesVConstraints = true;	
-		}
-		return satisfiesVConstraints&&!duplicateVal;
-	}
-	/**
-	 * find distinct partitions of a particular integer at a certain length
-	 * @param x - the cell we want to check constraints of
-	 * @param a - the value for x that we are checking constraints for
-	 */
-	public boolean checkHConstraints(Cell x, int a) {
-		boolean duplicateVal = false; //Check to see if value has been used
-		//Satified on H 
-		boolean satisfiesHConstraints = false;	
-
-		//******Horizontal******//
-		Set<Integer> hvalues = new HashSet<Integer>();//Set of values of Horiz Neighhood
-		hvalues.add(a);//Add self
-		if(x.getHorizNeighbors()!=null) { 
-			for(Cell y: x.getHorizNeighbors()) {//Add neighbors
-				hvalues.add(y.getValue());
-				if(y.getValue()==a)
-					duplicateVal = true; //set true if already exist
-			}
-			//Generate sums
-			int hSum =0;
-			for(int k: x.getHorizPosVals().get(0))
-				hSum+=k;	//add to sum
-			int hValSum =0;
-			for(int k: hvalues)
-				hValSum+=k;	//add to sum
-			//If a value has a 0, then sum can be up to hSum
-			if(hvalues.contains(0)) {
-				if(hValSum<=hSum) //if a partition contains the neighborhood
-					satisfiesHConstraints = true;
-			}
-			//else sum must equal hsum
-			else {
-				if(hValSum==hSum) //if a partition contains the neighborhood
-					satisfiesHConstraints = true;
-			}
-		}
-		else {
-			int hValSum =0;
-			for(int k: hvalues)
-				hValSum+=k;	//add to sum
-			if(hValSum==a) //if a partition contains the neighborhood
+		//Generate sums
+		int hSum =0;
+		for(int k: x.getHorizPosVals().get(0))
+			hSum+=k;	//add to sum
+		int hValSum =0;
+		for(int k: hvalues)
+			hValSum+=k;	//add to sum
+		//If a value has a 0, then sum can be up to hSum
+		if(hvalues.contains(0)) {
+			if(hValSum<=hSum) //if a partition contains the neighborhood
 				satisfiesHConstraints = true;
 		}
-
-
-		return satisfiesHConstraints&&!duplicateVal;
-
-	}
-	/**
-	 * find distinct partitions of a particular integer at a certain length
-	 * @param x - the cell we want to check constraints of
-	 * @param a - the value for x that we are checking constraints for
-	 */
-	public boolean checkVConstraints(Cell x, int a) {
-		boolean duplicateVal = false; //Check to see if value has been used
-		//Satified on V
-		boolean satisfiesVConstraints = false;
-		//******Vertical******/
-		Set<Integer> vertValues = new HashSet<Integer>();//Set of values of Horiz Neighhood
-		vertValues.add(a);//Add self
-		if(x.getVertNeighbors()!=null) {
-			for(Cell y: x.getVertNeighbors()) {//Add neighbors
-				vertValues.add(y.getValue());
-				if(y.getValue()==a)
-					duplicateVal = true;//set true if already exist
-			}			
-			//Generate sums
-			int vSum =0;
-			for(int k: x.getVertPosVals().get(0))
-				vSum+=k;	//add to sum
-			int vValSum =0;
-			for(int k: vertValues)
-				vValSum+=k;	//add to sum
-			//If a value has a 0, then sum can be up to vSum
-			if(vertValues.contains(0)) {
-				if(vValSum<=vSum) //if a partition contains the neighborhood
-					satisfiesVConstraints = true;
-			}	
-			//else sum must equal vSum
-			else {
-				if(vValSum==vSum) //if a partition contains the neighborhood
-					satisfiesVConstraints = true;
-			}	
-		}
+		//else sum must equal hsum
 		else {
-			int vValSum =0;
-			for(int k: vertValues)
-				vValSum+=k;	//add to sum
-			if(vValSum==a) //if a partition contains the neighborhood
+			if(hValSum==hSum) //if a partition contains the neighborhood
+				satisfiesHConstraints = true;
+		}
+	}
+	else {
+		int hValSum =0;
+		for(int k: hvalues)
+			hValSum+=k;	//add to sum
+		if(hValSum==a) //if a partition contains the neighborhood
+			satisfiesHConstraints = true;
+	}
+
+
+	return satisfiesHConstraints&&!duplicateVal;
+
+}
+/**
+ * find distinct partitions of a particular integer at a certain length
+ * @param x - the cell we want to check constraints of
+ * @param a - the value for x that we are checking constraints for
+ */
+public boolean checkVConstraints(Cell x, int a) {
+	boolean duplicateVal = false; //Check to see if value has been used
+	//Satified on V
+	boolean satisfiesVConstraints = false;
+	//******Vertical******/
+	Set<Integer> vertValues = new HashSet<Integer>();//Set of values of Horiz Neighhood
+	vertValues.add(a);//Add self
+	if(x.getVertNeighbors()!=null) {
+		for(Cell y: x.getVertNeighbors()) {//Add neighbors
+			vertValues.add(y.getValue());
+			if(y.getValue()==a)
+				duplicateVal = true;//set true if already exist
+		}			
+		//Generate sums
+		int vSum =0;
+		for(int k: x.getVertPosVals().get(0))
+			vSum+=k;	//add to sum
+		int vValSum =0;
+		for(int k: vertValues)
+			vValSum+=k;	//add to sum
+		//If a value has a 0, then sum can be up to vSum
+		if(vertValues.contains(0)) {
+			if(vValSum<=vSum) //if a partition contains the neighborhood
 				satisfiesVConstraints = true;
-		}
-
-		return satisfiesVConstraints&&!duplicateVal;
+		}	
+		//else sum must equal vSum
+		else {
+			if(vValSum==vSum) //if a partition contains the neighborhood
+				satisfiesVConstraints = true;
+		}	
 	}
-	/**
-	 * find distinct partitions of a particular integer at a certain length
-	 * @param x - the cell we want to check constraints of
-	 * @param a - the value for x that we are checking constraints for
-	 */
-	public boolean checkConstraints(Cell x, int a) {
-		return checkHConstraints( x, a)&&checkVConstraints(x, a);		
-	}
-
-	/*************************Finding Partitions**************************/
-
-	/**
-	 * find distinct partitions of a particular integer at a certain length
-	 * @param value - the number we want partitions of
-	 * @param length - length of a partition that we want
-	 */
-	public ArrayList<int[]> findPartitions(int value, int length) {
-		int[] array = new int [value];//hold partition, length can never be more than the number we are attempting to make
-
-		//Store in ArrayList of int arrays
-		ArrayList<int[]> posValues= new ArrayList<int[]>();
-
-		//use every int 1 to n as starting point
-		for(int i = 1; i < value; i++)
-		{
-			array[0] = i;//initilize starting point        
-			partitions(value, 0, array, 0, length,posValues);//curr = 0, idx = 0    
-		}
-		return posValues;
+	else {
+		int vValSum =0;
+		for(int k: vertValues)
+			vValSum+=k;	//add to sum
+		if(vValSum==a) //if a partition contains the neighborhood
+			satisfiesVConstraints = true;
 	}
 
-	/**
-	 * helper function to find distinct partitions of a particular integer at a certain length
-	 * @param target - the number we want partions of
-	 * @param curr - sum of the numbers we already have
-	 * @param array - array of numbers we are using
-	 * @param idx - track index of array we are at
-	 * @param desiredLength - length of a partition that we want
-	 */
-	public void partitions(int target, int curr, int[] array, int idx, int desiredLength, ArrayList<int[]> posValues)
-	{		
-		countRunsOfPartitions++;//Count numRuns
-		//store array in string to find length
-		String temp = "";
+	return satisfiesVConstraints&&!duplicateVal;
+}
+/**
+ * find distinct partitions of a particular integer at a certain length
+ * @param x - the cell we want to check constraints of
+ * @param a - the value for x that we are checking constraints for
+ */
+public boolean checkConstraints(Cell x, int a) {
+	return checkHConstraints( x, a)&&checkVConstraints(x, a);		
+}
+
+/*************************Finding Partitions**************************/
+
+/**
+ * find distinct partitions of a particular integer at a certain length
+ * @param value - the number we want partitions of
+ * @param length - length of a partition that we want
+ */
+public ArrayList<int[]> findPartitions(int value, int length) {
+	int[] array = new int [value];//hold partition, length can never be more than the number we are attempting to make
+
+	//Store in ArrayList of int arrays
+	ArrayList<int[]> posValues= new ArrayList<int[]>();
+
+	//use every int 1 to n as starting point
+	for(int i = 1; i < value; i++)
+	{
+		array[0] = i;//initilize starting point        
+		partitions(value, 0, array, 0, length,posValues);//curr = 0, idx = 0    
+	}
+	return posValues;
+}
+
+/**
+ * helper function to find distinct partitions of a particular integer at a certain length
+ * @param target - the number we want partions of
+ * @param curr - sum of the numbers we already have
+ * @param array - array of numbers we are using
+ * @param idx - track index of array we are at
+ * @param desiredLength - length of a partition that we want
+ */
+public void partitions(int target, int curr, int[] array, int idx, int desiredLength, ArrayList<int[]> posValues)
+{		
+	countRunsOfPartitions++;//Count numRuns
+	//store array in string to find length
+	String temp = "";
+	for (int i=0; i <= idx; i++)
+	{
+		temp += array[i];
+	}
+	//if we have created a partion of the target and have desired length (we have what we want)
+	if (curr + array[idx] == target && temp.length() == desiredLength)
+	{
+		//convert string to array
+		int[] posVal = new int[desiredLength];
 		for (int i=0; i <= idx; i++)
 		{
-			temp += array[i];
+			posVal[i]= array[i];
 		}
-		//if we have created a partion of the target and have desired length (we have what we want)
-		if (curr + array[idx] == target && temp.length() == desiredLength)
+		posValues.add(posVal);//add this partition to possible partitions
+		return;
+	}
+	//if we have numbers that go past our target we've added to many
+	else if (curr + array[idx] > target)
+	{
+		return;
+	}
+	else
+	{
+		//recursive, add next value to curr, add 1 to index, for each index of array
+		for(int i = array[idx]+1; i < 10; i++)
 		{
-			//convert string to array
-			int[] posVal = new int[desiredLength];
-			for (int i=0; i <= idx; i++)
-			{
-				posVal[i]= array[i];
-			}
-			posValues.add(posVal);//add this partition to possible partitions
-			return;
-		}
-		//if we have numbers that go past our target we've added to many
-		else if (curr + array[idx] > target)
-		{
-			return;
-		}
-		else
-		{
-			//recursive, add next value to curr, add 1 to index, for each index of array
-			for(int i = array[idx]+1; i < 10; i++)
-			{
-				array[idx+1] = i;//for each next index that we haven't looked at yet, add i to the index (1,1,1 -> 1,2,2 -> 1,2,3 etc)
-				partitions(target, curr + array[idx], array, idx+1, desiredLength, posValues);
-			}
+			array[idx+1] = i;//for each next index that we haven't looked at yet, add i to the index (1,1,1 -> 1,2,2 -> 1,2,3 etc)
+			partitions(target, curr + array[idx], array, idx+1, desiredLength, posValues);
 		}
 	}
+}
 
-	/**
-	 * toString method for board
-	 * @param board - the board we want to print
-	 */
-	/*************************toString**************************/
-	public String toString(Cell[][] board) {
-		String returned ="";
-		for (int row = 0; row < rowNum; row++) {
-			for (int col = 0; col < colNum; col++) {
-				//Horizontal arcs
+/**
+ * toString method for board
+ * @param board - the board we want to print
+ */
+/*************************toString**************************/
+public String toString(Cell[][] board) {
+	String returned ="";
+	for (int row = 0; row < rowNum; row++) {
+		for (int col = 0; col < colNum; col++) {
+			//Horizontal arcs
 
-				if(!board[row][col].getIsWall()){
-					returned += board[row][col].toString()+"\n";
-				}
+			if(!board[row][col].getIsWall()){
+				returned += board[row][col].toString()+"\n";
 			}
 		}
-		return returned;	
 	}
+	return returned;	
+}
 
-	/*************************Getters and Setters**************************/
+/*************************Getters and Setters**************************/
 
-	public Cell[][] getBoard() {
-		return board;
-	}
+public Cell[][] getBoard() {
+	return board;
+}
 
-	public void setBoard(Cell[][] board) {
-		this.board = board;
-	}
+public void setBoard(Cell[][] board) {
+	this.board = board;
+}
 
-	public int getRowNum() {
-		return rowNum;
-	}
+public int getRowNum() {
+	return rowNum;
+}
 
-	public void setRowNum(int rowNum) {
-		this.rowNum = rowNum;
-	}
+public void setRowNum(int rowNum) {
+	this.rowNum = rowNum;
+}
 
-	public int getColNum() {
-		return colNum;
-	}
+public int getColNum() {
+	return colNum;
+}
 
-	public void setColNum(int colNum) {
-		this.colNum = colNum;
-	}
+public void setColNum(int colNum) {
+	this.colNum = colNum;
+}
 
-	public LinkedList<Cell> getAllNonWallCells() {
-		return allNonWallCells;
-	}
+public LinkedList<Cell> getAllNonWallCells() {
+	return allNonWallCells;
+}
 
-	public void setAllNonWallCells(LinkedList<Cell> allNonWallCells) {
-		this.allNonWallCells = allNonWallCells;
-	}
+public void setAllNonWallCells(LinkedList<Cell> allNonWallCells) {
+	this.allNonWallCells = allNonWallCells;
+}
 
-	public int getCountRuns() {
-		return countRuns;
-	}
+public int getCountRuns() {
+	return countRuns;
+}
 
-	public void setCountRuns(int countRuns) {
-		this.countRuns = countRuns;
-	}
+public void setCountRuns(int countRuns) {
+	this.countRuns = countRuns;
+}
 
-	public int getCountRunsOfPartitions() {
-		return countRunsOfPartitions;
-	}
+public int getCountRunsOfPartitions() {
+	return countRunsOfPartitions;
+}
 
-	public void setCountRunsOfPartitions(int countRunsOfPartitions) {
-		this.countRunsOfPartitions = countRunsOfPartitions;
-	}
+public void setCountRunsOfPartitions(int countRunsOfPartitions) {
+	this.countRunsOfPartitions = countRunsOfPartitions;
+}
 
 }
