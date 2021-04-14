@@ -6,12 +6,12 @@ import java.util.Set;
 
 public class Board {
 	private char board[][];
-	private final char boardSize = 8;
+	private final char boardSize = 10;
 
 	public Board () {
 		board = new char[boardSize][boardSize];	
 		init();
-		printBoard(1);
+		printBoard('W');
 	}
 	
 	
@@ -31,12 +31,22 @@ public class Board {
 			for (int j = 0; j < boardSize; j++) {
 				board[i][j] = 'O'; //empty cells
 			}
+		
+		//init edges
+		for (int i = 0; i < boardSize; i++) {
+			board[i][0] = 'E';
+			board[i][9]	= 'E';
+		}
+		for (int j = 0; j < boardSize; j++) {
+			board[0][j] = 'E';
+			board[9][j]	= 'E';
+		}
 
 		//Initial start
-		board[3][3] = 'B';
 		board[4][4] = 'B';
-		board[3][4] = 'W';
-		board[4][3] = 'W';
+		board[5][5] = 'B';
+		board[4][5] = 'W';
+		board[5][4] = 'W';
 	}
 
 
@@ -44,23 +54,23 @@ public class Board {
 	     * This method prints the board to the console
 	     * @param turn current turn
 	     */
-	   public void printBoard(int turn) {
+	   public void printBoard(char turn) {
 	        int numBlacks = 0;
 	        int numWhites = 0;
 	        char[] topLabel = {'A','B','C','D','E','F','G','H'};
 	        System.out.println();
 	        System.out.printf("   ");
-	        for (int i = 0; i < boardSize; i++) {
+	        for (int i = 0; i < boardSize-2; i++) {
 	            System.out.printf(" " + topLabel[i] + "  ");
 	        }
 	        System.out.printf("\n  ");
-	        for (int i = 0; i < boardSize; i++) {
+	        for (int i = 0; i < boardSize-2; i++) {
 	            System.out.printf("----");
 	        }
 	        System.out.println();
-	        for (int i = 0; i < boardSize; i++) {
-	            System.out.printf((i+1) + " |");
-	            for (int j = 0; j < boardSize; j++) {
+	        for (int i = 1; i < boardSize-1; i++) {
+	            System.out.printf((i) + " |");
+	            for (int j = 1; j < boardSize-1; j++) {
 	                if (board[i][j] == 'W') {
 	                    System.out.printf(" W |");
 	                    numWhites++;
@@ -68,15 +78,15 @@ public class Board {
 	                    System.out.printf(" B |");
 	                    numBlacks++;
 	                } 
-	                /*else if (isValid(i, j, turn)) {
-	                    System.out.printf(" * |");}*/
+	                else if (legalMove(i, j, turn, false)) {
+	                    System.out.printf(" * |");}
 	                 else {
 	                    System.out.printf("   |");
 	                }
 	            }
 	            System.out.println();
 	            System.out.printf("  ");
-	            for (int j = 0; j < boardSize; j++) {
+	            for (int j = 0; j < boardSize-2; j++) {
 	                System.out.printf("----");
 	            }
 	            System.out.println();
@@ -108,8 +118,8 @@ public class Board {
 	    	ArrayList<int[]> actions = new ArrayList<int[]>();
 	   	
 	    	//For each space check valid moves
-	    	for (int i = 0; i < board.length; i++)
-				for (int j = 0; j < board.length; j++)		
+	    	for (int i = 1; i < board.length-1; i++)
+				for (int j = 1; j < board.length-1; j++)		
 					if(legalMove(i, j, turn, false)) {//if valid move
 						int[] action = {i,j};
 						actions.add(action); // add to possible actions
@@ -137,13 +147,13 @@ public class Board {
 			// If the cell is empty, begin the search
 			// If the cell is not empty there is no need to check anything 
 			// so the algorithm returns boolean legal as is
-			if (board[row][col] == 0)
+			if (board[row][col] == 'O')
 			{
 				// Initialize variables
 				int posX;
 				int posY;
 				boolean found;
-				int current;
+				char current;
 				
 				// Searches in each direction
 				// x and y describe a given direction in 9 directions
@@ -162,7 +172,7 @@ public class Board {
 						// Check the first cell in the direction specified by x and y
 						// If the cell is empty, out of bounds or contains the same color
 						// skip the rest of the algorithm to begin checking another direction
-						if (current == -1 || current == 0 || current == color)
+						if (current == 'E' || current == 'O' || current == color)
 						{
 							continue;
 						}
@@ -200,7 +210,7 @@ public class Board {
 							}
 							// If the algorithm reaches an out of bounds area or an empty space
 							// end the loop to check a new direction, but do not set legal to true yet
-							else if (current == -1 || current == 0)
+							else if (current == 'E' || current == 'O')
 							{
 								found = true;
 							}
