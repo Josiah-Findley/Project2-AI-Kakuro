@@ -59,5 +59,11 @@ public class OthelloMain {
     	copyToRet.getBoard()[action[0]][action[1]] = turn;
     	return copyToRet;
     }
+    
+    public static Board makeActualMove(Board state, int[] action, char turn) {
+    	state.getBoard()[action[0]][action[1]] = turn;
+    	
+    	return copyToRet;
+    }
 	
 }
