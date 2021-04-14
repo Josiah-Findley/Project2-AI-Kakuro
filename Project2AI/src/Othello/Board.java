@@ -1,5 +1,8 @@
 package Othello;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class Board {
 	private char board[][];
 	private final char boardSize = 8;
@@ -8,6 +11,18 @@ public class Board {
 		board = new char[boardSize][boardSize];	
 		init();
 		printBoard(1);
+	}
+	
+	
+	/**
+	 * Create deepCopy of Board
+	 */
+	public char[][] deepCopy(char[][] board){
+		char[][] deepCopy = new char[board.length][board[0].length];
+		for (int i = 0; i < deepCopy.length; i++)
+			for (int j = 0; j < deepCopy[0].length; j++)		
+					deepCopy[i][j] = board[i][j];				
+		return deepCopy;
 	}
 
 	public void init() {
@@ -43,7 +58,7 @@ public class Board {
 	        }
 	        System.out.println();
 	        for (int i = 0; i < boardSize; i++) {
-	            System.out.printf(i + " |");
+	            System.out.printf((i+1) + " |");
 	            for (int j = 0; j < boardSize; j++) {
 	                if (board[i][j] == 'W') {
 	                    System.out.printf(" W |");
