@@ -1,5 +1,6 @@
 package Othello;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -84,8 +85,134 @@ public class Board {
 	        System.out.println("Black: " + numBlacks + " - " + "White: " + numWhites);
 	        System.out.println(); 
 	    }
-
-
+	   
+	   /**
+	     * Board is full
+	     */
+	    public boolean isFull(){
+	    	//For each space check valid moves
+	    	for (int i = 0; i < board.length; i++)
+				for (int j = 0; j < board.length; j++)		
+					if(board[i][j]=='O') {//if moves possible
+						return false;
+						}
+	    	return true;	//return true if board is full
+	    }
+	   
+	   
+	    /**
+	     * Actions available
+	     * @param turn - turn color
+	     */
+	    public ArrayList<int[]> actions(char turn){
+	    	ArrayList<int[]> actions = new ArrayList<int[]>();
+	   	
+	    	//For each space check valid moves
+	    	for (int i = 0; i < board.length; i++)
+				for (int j = 0; j < board.length; j++)		
+					if(legalMove(i, j, turn, false)) {//if valid move
+						int[] action = {i,j};
+						actions.add(action); // add to possible actions
+						}
+	    	return actions;	//return poss actions
+	    }
+	   
+	   
+	   /**
+	     *  Decide if the move is legal
+	     *  Modified from https://github.com/haly/Othello/blob/master/Game.java
+	     *
+	     *  @param    row        row in the board matrix
+	     *  @param    col        column in the board matrix
+	     *  @param    color      color of the player - Black or White
+	     *  @param    flip       true if the player wants to flip the discs
+	     *
+	     *  @return              true if the move is legal, else false
+	     */
+	    public boolean legalMove(int row, int col, char color, boolean flip) 
+		{
+			// Initialize boolean legal as false
+			boolean legal = false;
+			
+			// If the cell is empty, begin the search
+			// If the cell is not empty there is no need to check anything 
+			// so the algorithm returns boolean legal as is
+			if (board[row][col] == 0)
+			{
+				// Initialize variables
+				int posX;
+				int posY;
+				boolean found;
+				int current;
+				
+				// Searches in each direction
+				// x and y describe a given direction in 9 directions
+				// 0, 0 is redundant and will break in the first check
+				for (int x = -1; x <= 1; x++)
+				{
+					for (int y = -1; y <= 1; y++)
+					{
+						// Variables to keep track of where the algorithm is and
+						// whether it has found a valid move
+						posX = col + x;
+						posY = row + y;
+						found = false;
+						current = board[posY][posX];
+						
+						// Check the first cell in the direction specified by x and y
+						// If the cell is empty, out of bounds or contains the same color
+						// skip the rest of the algorithm to begin checking another direction
+						if (current == -1 || current == 0 || current == color)
+						{
+							continue;
+						}
+						
+						// Otherwise, check along that direction
+						while (!found)
+						{
+							posX += x;
+							posY += y;
+							current = board[posY][posX];
+							
+							// If the algorithm finds another piece of the same color along a direction
+							// end the loop to check a new direction, and set legal to true
+							if (current == color)
+							{
+								found = true;
+								legal = true;
+								
+								// If flip is true, reverse the directions and start flipping until 
+								// the algorithm reaches the original location
+								if (flip)
+								{
+									posX -= x;
+									posY -= y;
+									current = board[posY][posX];
+									
+									while(current != 0)
+									{
+										board[posY][posX] = color;
+										posX -= x;
+										posY -= y;
+										current = board[posY][posX];
+									}
+								}
+							}
+							// If the algorithm reaches an out of bounds area or an empty space
+							// end the loop to check a new direction, but do not set legal to true yet
+							else if (current == -1 || current == 0)
+							{
+								found = true;
+							}
+						}
+					}
+				}
+			}
+	        return legal;
+	    }
+	    
+		/*************************Getters and Setters**************************/
+	    
 		public char[][] getBoard() {
 			return board;
 		}
@@ -99,9 +226,6 @@ public class Board {
 		public char getBoardSize() {
 			return boardSize;
 		}
-	
-	   
-	   
 
 	}
 
