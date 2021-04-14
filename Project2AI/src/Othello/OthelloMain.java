@@ -13,6 +13,10 @@ public class OthelloMain {
 		Board b = new Board();
 	}
 
+	public static void gameLoop(Board gameBoard) {
+		
+		
+	}
 
 
 	/**
@@ -114,6 +118,7 @@ public class OthelloMain {
 	}
 
 
+	
 
 	/*public static Board makeMoveAI(Board prevState, int[] action, char turn) {
     	Board copyToRet = new Board(prevState);

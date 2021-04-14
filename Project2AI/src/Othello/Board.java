@@ -8,10 +8,12 @@ public class Board {
 	private char board[][];
 	private final char boardSize = 10;
 
+	/**
+	 * Constructor of Board
+	 */
 	public Board () {
 		board = new char[boardSize][boardSize];	
 		init();
-		printBoard('W');
 	}
 	
 	
