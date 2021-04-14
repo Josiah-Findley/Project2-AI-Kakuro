@@ -17,12 +17,12 @@ public class Board {
 	/**
 	 * Create deepCopy of Board
 	 */
-	public char[][] deepCopy(char[][] board){
-		char[][] deepCopy = new char[board.length][board[0].length];
-		for (int i = 0; i < deepCopy.length; i++)
-			for (int j = 0; j < deepCopy[0].length; j++)		
-					deepCopy[i][j] = board[i][j];				
-		return deepCopy;
+	
+	public Board (Board orig) {
+		board = new char[orig.board.length][orig.board[0].length];
+		for (int i = 0; i < orig.board.length; i++)
+			for (int j = 0; j < orig.board[0].length; j++)		
+					board[i][j] = orig.board[i][j];				
 	}
 
 	public void init() {
@@ -84,6 +84,21 @@ public class Board {
 	        System.out.println("Black: " + numBlacks + " - " + "White: " + numWhites);
 	        System.out.println(); 
 	    }
+
+
+		public char[][] getBoard() {
+			return board;
+		}
+
+
+		public void setBoard(char[][] board) {
+			this.board = board;
+		}
+
+
+		public char getBoardSize() {
+			return boardSize;
+		}
 	
 	   
 	   
