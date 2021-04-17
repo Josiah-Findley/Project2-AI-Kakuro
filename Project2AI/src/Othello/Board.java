@@ -174,18 +174,18 @@ public class Board {
 						// Check the first cell in the direction specified by x and y
 						// If the cell is empty, out of bounds or contains the same color
 						// skip the rest of the algorithm to begin checking another direction
-						if (current == 'E' || current == 'O' || current == color)
-						{
+						if (current == 'E' || current == 'O'  || current == '*' || current == color)
+						{				
 							continue;
 						}
-						
+
 						// Otherwise, check along that direction
 						while (!found)
-						{
+						{	
 							posX += x;
 							posY += y;
 							current = board[posY][posX];
-							
+
 							// If the algorithm finds another piece of the same color along a direction
 							// end the loop to check a new direction, and set legal to true
 							if (current == color)
@@ -201,7 +201,7 @@ public class Board {
 									posY -= y;
 									current = board[posY][posX];
 									
-									while(current != 0)
+									while(current != 'O')
 									{
 										board[posY][posX] = color;
 										posX -= x;
@@ -212,14 +212,17 @@ public class Board {
 							}
 							// If the algorithm reaches an out of bounds area or an empty space
 							// end the loop to check a new direction, but do not set legal to true yet
-							else if (current == 'E' || current == 'O')
+							else if (current == 'E' || current == 'O'|| current == '*')
 							{
+								//System.out.println(x+ "stop"+y);
 								found = true;
 							}
 						}
 					}
 				}
 			}
+			if(legal&&flip)
+				board[row][col] = color;
 	        return legal;
 	    }
 	    

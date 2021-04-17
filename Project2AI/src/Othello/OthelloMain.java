@@ -1,6 +1,9 @@
 package Othello;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Scanner;
 
 public class OthelloMain {
 
@@ -11,11 +14,68 @@ public class OthelloMain {
 	public static void main(String[] args) {
 		// you may change the input to experiment with other boards
 		Board b = new Board();
+		gameLoop(b);
 	}
 
 	public static void gameLoop(Board gameBoard) {
+
+		char turn = 'B';
+
+		while(!gameBoard.isFull() && (gameBoard.actions('B').size()!=0 || gameBoard.actions('W').size()!=0)) {
+			if(gameBoard.actions(turn).size()!=0) {
+				gameBoard.printBoard(turn);
+				makeHumanMove(turn, gameBoard);
+			}
+
+			//change turn
+			if(turn =='W')
+				turn = 'B';
+			else
+				turn = 'W';
+
+		}
+
+	}
+
+	public static void makeHumanMove(char turn, Board board) {
+
+		System.out.println("\nPlayer "+ turn+  " enter a valid move: ");
+		boolean control = true;
 		
-		
+		while(control) {
+			Scanner sc = new Scanner (System.in);//open scanner
+			if(sc.hasNextLine()){
+				String input = sc.nextLine();//grab input
+				try {
+					int colAsci = (int)Character.toUpperCase(input.charAt(0));//first input
+					int rowAsci = (int)input.charAt(1);//second input
+
+					//total incorrect move
+					if(input.length()!=2) {
+						System.out.println("\nEnter a valid move (e.g. A3 or B7): ");
+					}
+					//in correct range
+					else if(colAsci>=65 && colAsci <=72 && (rowAsci)>= 48 && (rowAsci<= 56)) {
+						//if legal move make move
+						if(board.legalMove(rowAsci -48, colAsci-64, turn, true)) {
+							control = false;
+							break;
+						}
+						else {//try again
+							System.out.println("\nEnter a valid move (e.g. A3 or B7). Valid squares are indicated by and *: ");				
+						}	
+					}
+					else {//try again for valid input
+						System.out.println("\nEnter a valid move (e.g. A3 or B7). Valid squares are indicated by and *: ");				
+					}
+				}catch(Exception e) {
+					System.out.println("\nEnter a valid move (e.g. A3 or B7). Valid squares are indicated by and *: ");						
+				}
+			}
+			//System.out.println("sdf");
+			//sc.close();//close Scanner	
+		}
+
 	}
 
 
@@ -118,7 +178,7 @@ public class OthelloMain {
 	}
 
 
-	
+
 
 	/*public static Board makeMoveAI(Board prevState, int[] action, char turn) {
     	Board copyToRet = new Board(prevState);
