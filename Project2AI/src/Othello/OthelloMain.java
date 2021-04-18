@@ -15,6 +15,7 @@ public class OthelloMain {
 		// you may change the input to experiment with other boards
 		Board b = new Board();
 		gameLoop(b);
+		System.out.println("\n\n**Normal Termination**");
 	}
 
 	public static void gameLoop(Board gameBoard) {

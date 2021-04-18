@@ -231,6 +231,18 @@ public class Board {
 		public char[][] getBoard() {
 			return board;
 		}
+		
+		public boolean getBoardSpaceValue(int row, int col)
+		{
+			if(board[row][col] == 'B')
+			{
+				return false;
+			}
+			else
+			{
+				return true;
+			}
+		}
 
 
 		public void setBoard(char[][] board) {
