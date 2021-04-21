@@ -29,9 +29,13 @@ public class OthelloMain {
 		while(!gameBoard.isFull() && (gameBoard.actions('B').size()!=0 || gameBoard.actions('W').size()!=0)) {
 			if(gameBoard.actions(turn).size()!=0) {
 				makeHumanMove(turn, gameBoard);
-				gameBoard.printBoard(turn);
+				gameBoard.printBoard('B');
 			}
 			if(gameBoard.actions('B').size()!=0) {
+				for(int[] a: gameBoard.actions('B')) {
+					System.out.println(a[0]+" "+a[1] );
+					
+				}
 				int[] compMove = alphaBetaSearch(gameBoard, dep, 'B');
 
 				//	System.out.println(gameBoard.getHeuristic(turn));
@@ -41,6 +45,7 @@ public class OthelloMain {
 				gameBoard.printBoard(turn);
 
 			}
+			
 
 
 			/*//change turn

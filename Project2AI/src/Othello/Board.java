@@ -1,6 +1,8 @@
 package Othello;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -18,6 +20,7 @@ public class Board {
 	
 	
 	/**
+	 * Copy Constructor
 	 * Create deepCopy of Board
 	 */
 	
@@ -28,6 +31,10 @@ public class Board {
 					board[i][j] = orig.board[i][j];				
 	}
 
+	/**
+     * This method initializes the board
+     */
+	
 	public void init() {
 		for (int i = 0; i < boardSize; i++)
 			for (int j = 0; j < boardSize; j++) {
@@ -126,8 +133,33 @@ public class Board {
 						int[] action = {i,j};
 						actions.add(action); // add to possible actions
 						}
-	    	return actions;	//return poss actions
+	    	
+	    	Collections.sort(actions, new Comparator<int[]>() {
+	    	    public int compare(int[] a, int[] b) {
+	    	    	if((a[0]==1 && a[1]==1) || (a[0]==8 && a[1]==8)) {
+	    	    		return 0;
+	    	    	}
+	    	    	else if((b[0]==1 && b[1]==1) || (b[0]==8 && b[1]==8)) {
+	    	    		return 0;
+	    	    	}
+	    	    	else if((a[0]==1 || a[1]==1) || (a[0]==8 || a[1]==8)) {
+	    	    		return 1;
+	    	    	}
+	    	    	else if((b[0]==1 || b[1]==1) || (b[0]==8 || b[1]==8)) {
+	    	    		return 1;
+	    	    	}
+	    	    	else
+	    	    		return 2;
+	    	    		
+	    	    }
+	    	});
+	    	
+	    	return actions;
+	    	
+	    	//return poss actions
 	    }
+	    
+	    
 	   
 	   
 	   /**
@@ -214,7 +246,6 @@ public class Board {
 							// end the loop to check a new direction, but do not set legal to true yet
 							else if (current == 'E' || current == 'O'|| current == '*')
 							{
-								//System.out.println(x+ "stop"+y);
 								found = true;
 							}
 						}
@@ -240,14 +271,38 @@ public class Board {
 	                {2, -4, 1, 1, 1, 1, -4, 2},
 	                {10, 2, 7, 7, 7, 7, 2, 10}};
 
-	        int theHeuristic = 0;
+	        int heur = 0;
 
 	        for (int y = 1; y < 9; y++)
 	            for (int x = 1; x < 9; x++) {
-	                if (board[x][y] == turn) theHeuristic += values[y-1][x-1];
-	                else if (board[x][y] != 'O') theHeuristic -= values[y-1][x-1];
+	                if (board[x][y] == turn) heur += values[y-1][x-1];
+	                else if (board[x][y] != 'O') heur -= values[y-1][x-1];
 	            }
-	        return turn =='W' ? theHeuristic: -theHeuristic;
+	        return turn =='W' ? heur: -heur;
+	    }
+	 
+	 
+	 public int getHeuristicDiscsMovesCorners(char turn) {
+	        // give each square a certain value
+	        // corners are most valuable
+
+	        int[][] values = {
+	        {4, -3, 2, 2, 2, 2, -3, 4},
+	        {-3, -4, -1, -1, -1, -1, -4, -3},
+	        {2, -1, 0, 1, 1, 0, -1, 2},
+	        {2, -1, 0, 1, 1, 0, -1, 2},
+	        {2, -1, 1, 0, 0, 1, -1, 2},
+	        {-3, -4, -1, -1, -1, -1, -4, -3},
+	        {4, -3, 2, 2, 2, 2, -3, 4}};
+
+	        int heur = 0;
+
+	        for (int y = 1; y < 9; y++)
+	            for (int x = 1; x < 9; x++) {
+	                if (board[x][y] == turn) heur += values[y-1][x-1];
+	                else if (board[x][y] != 'O') heur -= values[y-1][x-1];
+	            }
+	        return turn =='W' ? heur: -heur;
 	    }
 	    
 		/*************************Getters and Setters**************************/
