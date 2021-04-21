@@ -31,7 +31,7 @@ public class Node {
 	 * @param row - the row of the spot we are looking at
 	 * @param col - the col of the spot we are looking at
 	 */
-	public void calculatePotentialMobility(char turn, Board b, int row, int col)
+	public int calculatePotentialMobility(char turn, Board b, int row, int col)
 	{
 		//boolean adjacent = b.getBoardSpaceValue(row, col);
 		boolean color;
@@ -117,8 +117,9 @@ public class Node {
 						}
 					}
 			}
+			i++;
 		}
-		this.setPotentialMobility(numOpposite);//number of adjacent spaces that are opposite color
+		return numOpposite;
 		
 	}
 
