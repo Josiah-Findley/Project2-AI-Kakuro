@@ -22,7 +22,7 @@ public class OthelloMain {
 
 		char turn = 'W';
 
-		int dep =3;
+		int dep =4;
 		
 		while(!gameBoard.isFull() && (gameBoard.actions('B').size()!=0 || gameBoard.actions('W').size()!=0)) {
 			if(gameBoard.actions(turn).size()!=0) {
@@ -31,7 +31,7 @@ public class OthelloMain {
 				makeHumanMove(turn, gameBoard);*/
 				int[] compMove = alphaBetaSearch(gameBoard, dep, turn);
 				
-				//System.out.println(gameBoard.getHeuristic(turn));
+				System.out.println(gameBoard.getHeuristic(turn));
 				if(compMove[0]!=-1)
 					gameBoard.legalMove(compMove[0], compMove[1], turn, true);
 				
@@ -41,11 +41,11 @@ public class OthelloMain {
 			//change turn
 			if(turn =='W') {
 				turn = 'B';
-				dep=8;
+				dep=1;
 			}
 			else {
 				turn = 'W';
-				dep=1;
+				dep=15;
 			
 			}
 				
@@ -103,12 +103,12 @@ public class OthelloMain {
 	 * @param depth - max depth of search 
 	 */
 	public static int[] alphaBetaSearch(Board state, int depth, char turn) {
-		int[] action;//init action	
+		int[] action = null;//init action	
 		if(turn=='W') { //if whites turn 		
 			action = maxValue(state, depth, Integer.MIN_VALUE, Integer.MAX_VALUE);
 		}	 
-		else {
-			action = minValue(state, depth, Integer.MAX_VALUE, Integer.MIN_VALUE);
+		else if(turn=='B') {
+			action = minValue(state, depth, Integer.MIN_VALUE, Integer.MAX_VALUE);
 		}	
 		return new int[] {action[1], action[2]}; //return last action
 	}
@@ -140,15 +140,21 @@ public class OthelloMain {
 			for(int[] a: state.actions('W')) {//for each action
 				Board copy = new Board(state);
 				copy.legalMove(a[0], a[1], 'W', true);
+				//copy.printBoard('W');
+				//System.out.println("depth: "+depth);
 				//grab minVal
 				int minVal = minValue(copy, depth-1, alpha, beta)[0];
+				//System.out.println("minVal:" +minVal);
 				if(v < minVal) //Store action
 					action = a;
 				v = java.lang.Math.max(v, minVal);
-				if(v>=beta) //return val if greater than equal to beta
+				if(v>=beta) { //return val if greater than equal to beta
+					//System.out.println("v: "+ v);
 					return new int[]{v, action[0], action[1]};//return val and action
+				}
 				//update alpha to larger of alpha and v
-				alpha = java.lang.Math.max(alpha, v); 		
+				alpha = java.lang.Math.max(alpha, v); 	
+				//System.out.println("alpha: "+alpha);
 			}
 		}
 		return new int[]{v, action[0], action[1]};//return val and action
@@ -170,7 +176,7 @@ public class OthelloMain {
 		int v = Integer.MAX_VALUE; //set val  
 		int[] action = {-1,-1}; //init action
 
-		//if no available actions : compute but don't cahnge board
+		//if no available actions : compute but don't change board
 		if(state.actions('B').isEmpty()) {
 			int maxVal = maxValue(state, depth-1, alpha, beta)[0];
 			v = java.lang.Math.min(v, maxVal);
@@ -183,13 +189,18 @@ public class OthelloMain {
 			for(int[] a: state.actions('B')) {//for each action
 				Board copy  = new Board(state);
 				copy.legalMove(a[0], a[1],'B', true);
+				//copy.printBoard('B');
+				//System.out.println("depth: "+depth);
 				//grab maxVal
 				int maxVal = maxValue(copy, depth-1, alpha, beta)[0];
+				//System.out.println("maxVal: "+maxVal);
 				if(v > maxVal) //Store action
 					action = a;
 				v = java.lang.Math.min(v, maxVal);
-				if(v<=alpha)//return val if less than equal to alpha
+				if(v<=alpha) {//return val if less than equal to alpha
+					//System.out.println("v: "+ v);
 					return new int[]{v, action[0], action[1]}; //return val and action
+				}
 				//update alpha to larger of alpha and v
 				beta = java.lang.Math.min(beta, v); 		
 			}	
