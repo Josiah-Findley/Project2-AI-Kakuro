@@ -22,23 +22,28 @@ public class OthelloMain {
 
 		char turn = 'W';
 
-		int dep =4;
+		int dep =8;
+
+		gameBoard.printBoard(turn);
 		
 		while(!gameBoard.isFull() && (gameBoard.actions('B').size()!=0 || gameBoard.actions('W').size()!=0)) {
 			if(gameBoard.actions(turn).size()!=0) {
-				/*gameBoard.printBoard(turn);
-				System.out.println(gameBoard.getHeuristic('W'));
-				makeHumanMove(turn, gameBoard);*/
-				int[] compMove = alphaBetaSearch(gameBoard, dep, turn);
-				
-				System.out.println(gameBoard.getHeuristic(turn));
+				makeHumanMove(turn, gameBoard);
+				gameBoard.printBoard(turn);
+			}
+			if(gameBoard.actions('B').size()!=0) {
+				int[] compMove = alphaBetaSearch(gameBoard, dep, 'B');
+
+				//	System.out.println(gameBoard.getHeuristic(turn));
 				if(compMove[0]!=-1)
-					gameBoard.legalMove(compMove[0], compMove[1], turn, true);
+					gameBoard.legalMove(compMove[0], compMove[1], 'B', true);	
 				
+				gameBoard.printBoard(turn);
+
 			}
 
-			
-			//change turn
+
+			/*//change turn
 			if(turn =='W') {
 				turn = 'B';
 				dep=1;
@@ -46,11 +51,8 @@ public class OthelloMain {
 			else {
 				turn = 'W';
 				dep=15;
-			
-			}
-				
-			
-			gameBoard.printBoard(turn);
+
+			}*/
 
 
 		}
@@ -60,7 +62,7 @@ public class OthelloMain {
 
 		System.out.println("\nPlayer "+ turn+  " enter a valid move: ");
 		boolean control = true;
-		
+
 		while(control) {
 			Scanner sc = new Scanner (System.in);//open scanner
 			if(sc.hasNextLine()){
@@ -123,7 +125,7 @@ public class OthelloMain {
 	public static int[] maxValue(Board state, int depth, int alpha, int beta) {
 		if(depth == 0||state.isFull())//terminal conditions
 			return new int[]{state.getHeuristic('W'), -1, -1};
-		
+
 		int v = Integer.MIN_VALUE;  //set val
 		int[] action = {-1,-1}; //init action
 
@@ -172,7 +174,7 @@ public class OthelloMain {
 		if(depth == 0||state.isFull()) {//terminal conditions
 			return new int[]{state.getHeuristic('B'), -1, -1};	
 		}
-		
+
 		int v = Integer.MAX_VALUE; //set val  
 		int[] action = {-1,-1}; //init action
 
