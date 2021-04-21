@@ -226,6 +226,30 @@ public class Board {
 	        return legal;
 	    }
 	    
+	 public int getHeuristic(char turn) {
+	        // give each square a certain value
+	        // corners are most valuable
+
+	        int[][] values = {
+	                {10, 2, 7, 7, 7, 7, 2, 10},
+	                {2, -4, 1, 1, 1, 1, -4, 2},
+	                {7, 1, 1, 1, 1, 1, 1, 7},
+	                {7, 1, 1, 1, 1, 1, 1, 7},
+	                {7, 1, 1, 1, 1, 1, 1, 7},
+	                {7, 1, 1, 1, 1, 1, 1, 7},
+	                {2, -4, 1, 1, 1, 1, -4, 2},
+	                {10, 2, 7, 7, 7, 7, 2, 10}};
+
+	        int theHeuristic = 0;
+
+	        for (int y = 1; y < 9; y++)
+	            for (int x = 1; x < 9; x++) {
+	                if (board[x][y] == turn) theHeuristic += values[y-1][x-1];
+	                else if (board[x][y] != 'O') theHeuristic -= values[y-1][x-1];
+	            }
+	        return turn =='W' ? theHeuristic: -theHeuristic;
+	    }
+	    
 		/*************************Getters and Setters**************************/
 	    
 		public char[][] getBoard() {
