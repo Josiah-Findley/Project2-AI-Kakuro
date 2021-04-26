@@ -21,7 +21,6 @@ public class Board {
 	/**
 	 * Copy Constructor Create deepCopy of Board
 	 */
-
 	public Board(Board orig) {
 		board = new char[orig.board.length][orig.board[0].length];
 		for (int i = 0; i < orig.board.length; i++)
@@ -117,10 +116,11 @@ public class Board {
 
 	/**
 	 * Actions available
-	 * 
 	 * @param turn - turn color
+	 * @param sort - sort by piece type
+	 * Returns array list of actions available
 	 */
-	public ArrayList<int[]> actions(char turn) {
+	public ArrayList<int[]> actions(char turn, boolean sort) {
 		ArrayList<int[]> actions = new ArrayList<int[]>();
 
 		// For each space check valid moves
@@ -130,31 +130,26 @@ public class Board {
 					int[] action = { i, j };
 					actions.add(action); // add to possible actions
 				}
-		
-		//compare and sort actions - corners then edges then others based on potential mobility
-		Collections.sort(actions, new Comparator<int[]>() {
-			public int compare(int[] a, int[] b) {
-				if (((a[0] == 1 || a[0] == 8) && (a[1] == 1 || a[1] == 8))&&!((b[0] == 1 || b[0] == 8) && (b[1] == 1 || b[1] == 8))) {		
-					return -1;
-				} else if (((a[0] == 1 || a[1] == 1) || (a[0] == 8 || a[1] == 8))&&!((b[0] == 1 || b[1] == 1) || (b[0] == 8 || b[1] == 8))) {
-					return -1;
-				} else if (!((a[0] == 1 || a[0] == 8) && (a[1] == 1 || a[1] == 8))&&((b[0] == 1 || b[0] == 8) && (b[1] == 1 || b[1] == 8))) {		
-					return 1;
-				} else if (!((a[0] == 1 || a[1] == 1) || (a[0] == 8 || a[1] == 8))&&((b[0] == 1 || b[1] == 1) || (b[0] == 8 || b[1] == 8))) {
-					return 1;
-				} /*else if(calculatePotentialMobility(turn, a[0], a[1])>calculatePotentialMobility(turn, b[0], b[1])) {
-					return 1;
-				} else if(calculatePotentialMobility(turn, a[0], a[1])<calculatePotentialMobility(turn, b[0], b[1])) {
-					return -1;
-				}*/else {
-					return 0;
-				}		
-			}
-		});
 
-		return actions;
-
+		if(sort)
+			//compare and sort actions - corners then edges then others based on potential mobility
+			Collections.sort(actions, new Comparator<int[]>() {
+				public int compare(int[] a, int[] b) {
+					if (((a[0] == 1 || a[0] == 8) && (a[1] == 1 || a[1] == 8))&&!((b[0] == 1 || b[0] == 8) && (b[1] == 1 || b[1] == 8))) {		
+						return -1;
+					} else if (((a[0] == 1 || a[1] == 1) || (a[0] == 8 || a[1] == 8))&&!((b[0] == 1 || b[1] == 1) || (b[0] == 8 || b[1] == 8))) {
+						return -1;
+					} else if (!((a[0] == 1 || a[0] == 8) && (a[1] == 1 || a[1] == 8))&&((b[0] == 1 || b[0] == 8) && (b[1] == 1 || b[1] == 8))) {		
+						return 1;
+					} else if (!((a[0] == 1 || a[1] == 1) || (a[0] == 8 || a[1] == 8))&&((b[0] == 1 || b[1] == 1) || (b[0] == 8 || b[1] == 8))) {
+						return 1;
+					} else {
+						return 0;
+					}		
+				}
+			});
 		// return poss actions
+		return actions;	
 	}
 
 	/**
@@ -245,7 +240,7 @@ public class Board {
 	/*
 	 * All heuristics were researched and then implemented from a variety of different ideas
 	 */
-	
+
 	public int getHeuristic(char turn) {
 		// give each square a certain value
 		// corners are most valuable
@@ -256,6 +251,7 @@ public class Board {
 
 		int heur = 0;
 
+		//Find the heur by finding the net sum
 		for (int y = 1; y < 9; y++)
 			for (int x = 1; x < 9; x++) {
 				if (board[x][y] == turn)
@@ -263,7 +259,7 @@ public class Board {
 				else if (board[x][y] != 'O')
 					heur -= values[y - 1][x - 1];
 			}
-		
+
 		return turn == 'W' ? heur : -heur;
 	}
 
@@ -276,7 +272,7 @@ public class Board {
 				{ -3, -4, -1, -1, -1, -1, -4, -3 }, { 4, -3, 2, 2, 2, 2, -3, 4 } };
 
 		int heur = 0;
-
+		//Find the heur by finding the net sum
 		for (int y = 1; y < 9; y++)
 			for (int x = 1; x < 9; x++) {
 				if (board[x][y] == turn)
@@ -304,8 +300,8 @@ public class Board {
 				else if (board[x][y] != 'O')
 					heur -= values[y - 1][x - 1];
 			}
-		
-		return turn == 'W' ? heur + actions('W').size() : -heur-actions('B').size();
+
+		return turn == 'W' ? heur + actions('W', false).size() : -heur-actions('B', false).size();
 	}
 
 	/**
