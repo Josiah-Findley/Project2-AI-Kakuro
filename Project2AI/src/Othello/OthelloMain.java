@@ -7,6 +7,19 @@ import java.util.Scanner;
 
 public class OthelloMain {
 
+	//Data Variables
+	static char white = 'W';
+	static char black = 'B';
+	static int whiteDepth = 5;
+	static int blackDepth = 17;
+	static int time = 4;//seconds for search
+	static int minDepth = 3;
+	static boolean whiteComp = true;
+	static boolean blackComp = true;
+	static String whiteHeur = "getHeuristicMobility";
+	static String blackHeur = "getHeuristicMobility";
+	static String endGameHeur = "getHeuristicCoinParityEndGame";
+
 	/**
 	 * Main method to run a round of othello
 	 * @param args command line parameters
@@ -17,64 +30,76 @@ public class OthelloMain {
 		gameLoop(b);
 		System.out.println("\n\n**Normal Termination**");
 	}
-	
+
 	/*
 	 * Runs game and takes in initial gameBoard
 	 */
 	public static void gameLoop(Board gameBoard) {
 
-		//Data variables
-		boolean whiteComp = true;
-		boolean blackComp = true;
-		char white = 'W';
-		char black = 'B';
-		int whiteDepth = 5;
-		int blackDepth = 7;
-		
 		Scanner sc = new Scanner (System.in);//open scanner
-	
+
 		//Print initial board
 		gameBoard.printBoard(white);
-
-		//while game not over
-		while(!gameBoard.isFull() && (gameBoard.actions(black,false).size()!=0 || gameBoard.actions(white,false).size()!=0)) {			
-			//whites turn
-			if(gameBoard.actions(white, false).size()!=0) {//if available actions
-				if(!whiteComp)//if still humans move
-					whiteComp = makeHumanMove(white, gameBoard, sc);
-				if(whiteComp) {//if comps move
-					int[] compMove;
-					if(gameBoard.isEndGame(whiteDepth)) {//if endgame
-						compMove = alphaBetaSearch(gameBoard, whiteDepth, white,"getHeuristicCoinParityEndGame");			
-					}
-					else//not endgame
-						compMove = alphaBetaSearch(gameBoard, whiteDepth, white,"getHeuristicMobility");
-					//if move legal
-					if(compMove[0]!=-1)
-						gameBoard.legalMove(compMove[0], compMove[1], white, true);						
-				}			
-				gameBoard.printBoard(black);//print board
+		for(int i=3; i<9;i++) {
+			whiteDepth = i;
+			blackDepth = i;
+			while(!gameBoard.isFull() && (gameBoard.actions(black,false).size()!=0 || gameBoard.actions(white,false).size()!=0)) {			
+				runRound( gameBoard, whiteHeur, blackHeur, sc);		
 			}
-			//blacks turn
-			if(gameBoard.actions(black, false).size()!=0) {
-				if(!blackComp)//if humans move
-					blackComp = makeHumanMove(black, gameBoard, sc);
-				if(blackComp) {//if comps move
-					int[] compMove;//comps move
-					if(gameBoard.isEndGame(blackDepth)) {//if endgame
-						compMove = alphaBetaSearch(gameBoard, blackDepth, black,"getHeuristicCoinParityEndGame");			
-					}
-					else//not endgame
-						compMove = alphaBetaSearch(gameBoard, blackDepth, black,"getHeuristicCoinParityEndGame");
-					//if move legal
-					if(compMove[0]!=-1)
-						gameBoard.legalMove(compMove[0], compMove[1], black, true);						
-				}			
-				gameBoard.printBoard(white);//print board
-			}
+			System.out.println(whiteDepth+" "+blackDepth);
+			//while game not over
 		}
+		gameBoard.printBoard(white);//print board
 		sc.close();//close scanner
 	}
+	
+	/**
+	 * Runs one turn of black and white
+	 * @param gameBoard - current gameboard
+	 * @param whiteHeur - white heuristic
+	 * @param blackHeur - black heuristic
+	 * @param sc - current scanner
+	 */
+	public static void runRound(Board gameBoard, String whiteHeur, String blackHeur, Scanner sc) {	
+		//whites turn
+		if(gameBoard.actions(white, false).size()!=0) {//if available actions
+			if(!whiteComp)//if still humans move
+				whiteComp = makeHumanMove(white, gameBoard, sc);
+			if(whiteComp) {//if comps move
+				int[] compMove;
+				if(gameBoard.isEndGame(whiteDepth)) {//if endgame
+					compMove = alphaBetaSearch(gameBoard, whiteDepth, white, endGameHeur);			
+				}
+				else//not endgame
+					compMove = alphaBetaSearch(gameBoard, whiteDepth, white, whiteHeur);
+				//if move legal
+				if(compMove[0]!=-1)
+					gameBoard.legalMove(compMove[0], compMove[1], white, true);						
+			}			
+			//gameBoard.printBoard(black);//print board
+		}
+		//blacks turn
+		if(gameBoard.actions(black, false).size()!=0) {
+			if(!blackComp)//if humans move
+				blackComp = makeHumanMove(black, gameBoard, sc);
+			if(blackComp) {//if comps move
+				int[] compMove;//comps move
+				if(gameBoard.isEndGame(blackDepth)) {//if endgame
+					compMove = alphaBetaSearch(gameBoard, blackDepth, black, endGameHeur);			
+					//compMove = iterativeDeepening(gameBoard, time, minDepth, blackDepth, black,"getHeuristicCoinParityEndGame");			
+				}
+				else{//not endgame
+					compMove = alphaBetaSearch(gameBoard, blackDepth, black, blackHeur);
+					//compMove = iterativeDeepening(gameBoard, time, minDepth, blackDepth, black,"getHeuristicMobility");
+				}
+				//if move legal
+				if(compMove[0]!=-1)
+					gameBoard.legalMove(compMove[0], compMove[1], black, true);						
+			}			
+			//gameBoard.printBoard(white);//print board	
+		}
+	}
+
 
 	/*
 	 * Makes a human move
@@ -119,9 +144,7 @@ public class OthelloMain {
 		}
 		return false;
 	}
-	
-	
-	
+
 	/**
 	 * Run iterative deepening until time is hit
 	 * @param state - current board
@@ -130,7 +153,7 @@ public class OthelloMain {
 	 * @param depth - end depth
 	 * @param turn - current turn
 	 * @param heur - heuristic used
-	 * @return - actino
+	 * @return - action returned
 	 */
 	public static int[] iterativeDeepening(Board state, int time, int initDepth, int depth, char turn, String heur) {
 		int[] action = null;//init action
@@ -138,14 +161,21 @@ public class OthelloMain {
 		long start;
 		start = System.nanoTime();//Start timer
 		for(int i =initDepth; i<=depth;i++) {//run iterative deepening until time is hit
-			if((System.nanoTime()-start)/1000<time)
-				action = alphaBetaSearch(state, depth, turn, heur);
-			else 
+
+			if((System.nanoTime()-start)/1_000_000_000<time) {
+				System.out.println((System.nanoTime()-start)/1_000_000_000);
+				action = alphaBetaSearch(state, i, turn, heur);
+			}
+			else {
+
+				System.out.println((System.nanoTime()-start)/1_000_000_000);
 				return action;
+			}
+
 		}
 		return action;
 	}
- 
+
 	/**
 	 * Alpha Beta Searching
 	 * @param state - current state
