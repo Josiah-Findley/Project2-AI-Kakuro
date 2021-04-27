@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class Board {
+	//Member Variables
 	private char board[][];
 	private final char boardSize = 10;
 
@@ -31,7 +32,6 @@ public class Board {
 	/**
 	 * This method initializes the board
 	 */
-
 	public void init() {
 		for (int i = 0; i < boardSize; i++)
 			for (int j = 0; j < boardSize; j++) {
@@ -63,7 +63,8 @@ public class Board {
 	public void printBoard(char turn) {
 		int numBlacks = 0;
 		int numWhites = 0;
-		char[] topLabel = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H' };
+		char[] topLabel = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H' };//top labels
+		//Print board
 		System.out.println();
 		System.out.printf("   ");
 		for (int i = 0; i < boardSize - 2; i++) {
@@ -84,7 +85,7 @@ public class Board {
 					System.out.printf(" B |");
 					numBlacks++;
 				} else if (legalMove(i, j, turn, false)) {
-					System.out.printf(" * |");
+					System.out.printf(" * |");//print legal moves
 				} else {
 					System.out.printf("   |");
 				}
@@ -113,7 +114,7 @@ public class Board {
 				}
 		return true; // return true if board is full
 	}
-	
+
 	/**
 	 * Board is at the endgame stage
 	 * @param depth - curr depth of search
@@ -140,7 +141,6 @@ public class Board {
 	 */
 	public ArrayList<int[]> actions(char turn, boolean sort) {
 		ArrayList<int[]> actions = new ArrayList<int[]>();
-
 		// For each space check valid moves
 		for (int i = 1; i < board.length - 1; i++)
 			for (int j = 1; j < board.length - 1; j++)
@@ -148,7 +148,6 @@ public class Board {
 					int[] action = { i, j };
 					actions.add(action); // add to possible actions
 				}
-
 		if(sort)
 			//compare and sort actions - corners then edges then others based on potential mobility
 			Collections.sort(actions, new Comparator<int[]>() {
@@ -255,15 +254,12 @@ public class Board {
 		return legal;
 	}
 
-	
-	
-	
-	/*
-	 * All heuristics were researched and then implemented from a variety of different ideas
-	 */
 
+	/***************************************************************************************
+	 * All heuristics were researched and then implemented from a variety of different ideas
+	 ****************************************************************************************/
 	/*
-	 * Used in end game 
+	 * Used in end game based on number of coin
 	 */
 	public int getHeuristicCoinParityEndGame(char turn) {
 		// give each square a certain value
@@ -282,10 +278,12 @@ public class Board {
 		return turn == 'W' ? heur : -heur;
 	}
 
+	/*
+	 * Stability heuristic
+	 */
 	public int getHeuristic(char turn) {
 		// give each square a certain value
 		// corners are most valuable
-
 		int[][] values = { { 10, -3, 2, 2, 2, 2, -3, 10 }, { -3, -4, -1, -1, -1, -1, -4, -3 }, { 2, -1, 1, 0, 0, 1, -1, 2 },
 				{ 2, -1, 0, 1, 1, 0, -1, 2 }, { 2, -1, 0, 1, 1, 0, -1, 2 }, { 2, -1, 1, 0, 0, 1, -1, 2 },
 				{ -3, -4, -1, -1, -1, -1, -4, -3 }, { 10, -3, 2, 2, 2, 2, -3, 10 } };
@@ -301,11 +299,13 @@ public class Board {
 			}
 		return turn == 'W' ? heur : -heur;
 	}
-	
+	/*
+	 * Potential Mobility, Immediate Mobility, and Stability heuristic
+	 * Heavy weighted corners
+	 */
 	public int getHeuristicMobility(char turn) {
 		// give each square a certain value
 		// corners are most valuable
-
 		int[][] values = { { 100, -3, 2, 2, 2, 2, -3, 100 }, { -3, -4, -1, -1, -1, -1, -4, -3 }, { 2, -1, 1, 0, 0, 1, -1, 2 },
 				{ 2, -1, 0, 1, 1, 0, -1, 2 }, { 2, -1, 0, 1, 1, 0, -1, 2 }, { 2, -1, 1, 0, 0, 1, -1, 2 },
 				{ -3, -4, -1, -1, -1, -1, -4, -3 }, { 100, -3, 2, 2, 2, 2, -3, 100 } };		
@@ -316,7 +316,7 @@ public class Board {
 		} else {
 			oppTurn = 'B';
 		}	
-		//Calculate Heuristic
+		//Find the heur by finding the net sum
 		int heur = 0;
 		for (int y = 1; y < 9; y++)
 			for (int x = 1; x < 9; x++) {
@@ -326,22 +326,24 @@ public class Board {
 				}
 				else if (board[x][y] != 'O') {
 					heur -= values[y - 1][x - 1];
-				heur -= calculatePotentialMobility(oppTurn, y, x);
+					heur -= calculatePotentialMobility(oppTurn, y, x);
 				}
 			}
-
 		return turn == 'W' ? heur + actions('W', false).size() : -heur-actions('B', false).size();
 	}
 
+	/*
+	 * Immediate Mobility, and Stability heuristic
+	 * Heavy weighted corners
+	 */
 	public int getHeuristicDiscsMovesCorners(char turn) {
 		// give each square a certain value
 		// corners are most valuable
-
 		int[][] values = { { 100, -3, 2, 2, 2, 2, -3, 100 }, { -3, -4, -1, -1, -1, -1, -4, -3 }, { 2, -1, 1, 0, 0, 1, -1, 2 },
 				{ 2, -1, 0, 1, 1, 0, -1, 2 }, { 2, -1, 0, 1, 1, 0, -1, 2 }, { 2, -1, 1, 0, 0, 1, -1, 2 },
 				{ -3, -4, -1, -1, -1, -1, -4, -3 }, { 100, -3, 2, 2, 2, 2, -3, 100 } };
-		
-		//Calculate heuristic
+
+		//Find the heur by finding the net sum
 		int heur = 0;
 		for (int y = 1; y < 9; y++)
 			for (int x = 1; x < 9; x++) {
@@ -350,7 +352,6 @@ public class Board {
 				else if (board[x][y] != 'O')
 					heur -= values[y - 1][x - 1];
 			}
-
 		return turn == 'W' ? heur + actions('W', false).size() : -heur-actions('B', false).size();
 	}
 
@@ -419,7 +420,6 @@ public class Board {
 			i++;
 		}
 		return numOpposite;
-
 	}
 
 	/************************* Getters and Setters **************************/

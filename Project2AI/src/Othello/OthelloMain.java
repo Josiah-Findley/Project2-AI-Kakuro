@@ -26,10 +26,8 @@ public class OthelloMain {
 		//Data variables
 		boolean whiteComp = true;
 		boolean blackComp = true;
-		
 		char white = 'W';
 		char black = 'B';
-		
 		int whiteDepth = 5;
 		int blackDepth = 7;
 		
@@ -54,8 +52,7 @@ public class OthelloMain {
 					//if move legal
 					if(compMove[0]!=-1)
 						gameBoard.legalMove(compMove[0], compMove[1], white, true);						
-				}
-					
+				}			
 				gameBoard.printBoard(black);//print board
 			}
 			//blacks turn
@@ -72,8 +69,7 @@ public class OthelloMain {
 					//if move legal
 					if(compMove[0]!=-1)
 						gameBoard.legalMove(compMove[0], compMove[1], black, true);						
-				}
-					
+				}			
 				gameBoard.printBoard(white);//print board
 			}
 		}
@@ -86,17 +82,14 @@ public class OthelloMain {
 	 * @param board - the current board
 	 */
 	public static boolean makeHumanMove(char turn, Board board, Scanner sc) {
-
 		System.out.println("\nPlayer "+ turn+  " enter a valid move: ");
-		boolean control = true;
-
+		boolean control = true;//while control variable
 		while(control) {
-			if(sc.hasNextLine()){
+			if(sc.hasNextLine()){//if next line
 				String input = sc.nextLine();//grab input
-				if(input.equalsIgnoreCase("computer")) {
+				if(input.equalsIgnoreCase("computer")) {//flip to computer
 					return true;				
-				}
-					
+				}			
 				try {
 					int colAsci = (int)Character.toUpperCase(input.charAt(0));//first input
 					int rowAsci = (int)input.charAt(1);//second input
@@ -126,7 +119,33 @@ public class OthelloMain {
 		}
 		return false;
 	}
-
+	
+	
+	
+	/**
+	 * Run iterative deepening until time is hit
+	 * @param state - current board
+	 * @param time - time in secs till stop
+	 * @param initDepth - start depth
+	 * @param depth - end depth
+	 * @param turn - current turn
+	 * @param heur - heuristic used
+	 * @return - actino
+	 */
+	public static int[] iterativeDeepening(Board state, int time, int initDepth, int depth, char turn, String heur) {
+		int[] action = null;//init action
+		//vars for timing
+		long start;
+		start = System.nanoTime();//Start timer
+		for(int i =initDepth; i<=depth;i++) {//run iterative deepening until time is hit
+			if((System.nanoTime()-start)/1000<time)
+				action = alphaBetaSearch(state, depth, turn, heur);
+			else 
+				return action;
+		}
+		return action;
+	}
+ 
 	/**
 	 * Alpha Beta Searching
 	 * @param state - current state
@@ -153,7 +172,7 @@ public class OthelloMain {
 	 */
 	public static int[] maxValue(Board state, int depth, int alpha, int beta, String heur) {
 		if(depth == 0||state.isFull())//terminal conditions
-			switch(heur) {
+			switch(heur) {//which heuristic is being used
 			case "getHeuristic":
 				return new int[]{state.getHeuristic('W'), -1, -1};
 			case "getHeuristicMobility":
@@ -211,7 +230,7 @@ public class OthelloMain {
 	 */
 	public static int[] minValue(Board state, int depth, int alpha, int beta, String heur) {
 		if(depth == 0||state.isFull()) {//terminal conditions
-			switch(heur) {
+			switch(heur) {//which heuristic is being used
 			case "getHeuristic":
 				return new int[]{state.getHeuristic('B'), -1, -1};
 			case "getHeuristicMobility":
