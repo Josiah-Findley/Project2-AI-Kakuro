@@ -24,26 +24,33 @@ public class OthelloMain {
 	public static void gameLoop(Board gameBoard) {
 
 		//Data variables
-		boolean whiteComp = false;
-		boolean blackComp = false;
+		boolean whiteComp = true;
+		boolean blackComp = true;
 		
 		char white = 'W';
 		char black = 'B';
 		
-		int whiteDepth = 8;
-		int blackDepth = 8;
+		int whiteDepth = 5;
+		int blackDepth = 7;
+		
+		Scanner sc = new Scanner (System.in);//open scanner
 	
 		//Print initial board
 		gameBoard.printBoard(white);
 
 		//while game not over
-		while(!gameBoard.isFull() && (gameBoard.actions(black).size()!=0 || gameBoard.actions(white).size()!=0)) {			
+		while(!gameBoard.isFull() && (gameBoard.actions(black,false).size()!=0 || gameBoard.actions(white,false).size()!=0)) {			
 			//whites turn
-			if(gameBoard.actions(white).size()!=0) {//if available actions
+			if(gameBoard.actions(white, false).size()!=0) {//if available actions
 				if(!whiteComp)//if still humans move
-					whiteComp = makeHumanMove(white, gameBoard);
+					whiteComp = makeHumanMove(white, gameBoard, sc);
 				if(whiteComp) {//if comps move
-					int[] compMove = alphaBetaSearch(gameBoard, whiteDepth, white,"getHeuristicDiscsMovesCorners");
+					int[] compMove;
+					if(gameBoard.isEndGame(whiteDepth)) {//if endgame
+						compMove = alphaBetaSearch(gameBoard, whiteDepth, white,"getHeuristicCoinParityEndGame");			
+					}
+					else//not endgame
+						compMove = alphaBetaSearch(gameBoard, whiteDepth, white,"getHeuristicMobility");
 					//if move legal
 					if(compMove[0]!=-1)
 						gameBoard.legalMove(compMove[0], compMove[1], white, true);						
@@ -52,11 +59,16 @@ public class OthelloMain {
 				gameBoard.printBoard(black);//print board
 			}
 			//blacks turn
-			if(gameBoard.actions(black).size()!=0) {
+			if(gameBoard.actions(black, false).size()!=0) {
 				if(!blackComp)//if humans move
-					blackComp = makeHumanMove(black, gameBoard);
+					blackComp = makeHumanMove(black, gameBoard, sc);
 				if(blackComp) {//if comps move
-					int[] compMove = alphaBetaSearch(gameBoard, blackDepth, black,"getHeuristicDiscsMovesCorners");
+					int[] compMove;//comps move
+					if(gameBoard.isEndGame(blackDepth)) {//if endgame
+						compMove = alphaBetaSearch(gameBoard, blackDepth, black,"getHeuristicCoinParityEndGame");			
+					}
+					else//not endgame
+						compMove = alphaBetaSearch(gameBoard, blackDepth, black,"getHeuristicCoinParityEndGame");
 					//if move legal
 					if(compMove[0]!=-1)
 						gameBoard.legalMove(compMove[0], compMove[1], black, true);						
@@ -65,6 +77,7 @@ public class OthelloMain {
 				gameBoard.printBoard(white);//print board
 			}
 		}
+		sc.close();//close scanner
 	}
 
 	/*
@@ -72,17 +85,15 @@ public class OthelloMain {
 	 * @param turn - players color
 	 * @param board - the current board
 	 */
-	public static boolean makeHumanMove(char turn, Board board) {
+	public static boolean makeHumanMove(char turn, Board board, Scanner sc) {
 
 		System.out.println("\nPlayer "+ turn+  " enter a valid move: ");
 		boolean control = true;
 
 		while(control) {
-			Scanner sc = new Scanner (System.in);//open scanner
 			if(sc.hasNextLine()){
 				String input = sc.nextLine();//grab input
 				if(input.equalsIgnoreCase("computer")) {
-					sc.close();
 					return true;				
 				}
 					
@@ -145,10 +156,12 @@ public class OthelloMain {
 			switch(heur) {
 			case "getHeuristic":
 				return new int[]{state.getHeuristic('W'), -1, -1};
-			case "getHeuristic2":
-				return new int[]{state.getHeuristic2('W'), -1, -1};
+			case "getHeuristicMobility":
+				return new int[]{state.getHeuristicMobility('W'), -1, -1};
 			case "getHeuristicDiscsMovesCorners":
-				return new int[]{state.getHeuristicDiscsMovesCorners('W'), -1, -1};		
+				return new int[]{state.getHeuristicDiscsMovesCorners('W'), -1, -1};	
+			case "getHeuristicCoinParityEndGame":
+				return new int[]{state.getHeuristicCoinParityEndGame('W'), -1, -1};
 			}
 
 
@@ -156,7 +169,7 @@ public class OthelloMain {
 		int[] action = {-1,-1}; //init action
 
 		//if no available actions : compute but don't cahnge board
-		if(state.actions('W').isEmpty()) {
+		if(state.actions('W', false).isEmpty()) {
 			int minVal = minValue(state, depth-1, alpha, beta, heur)[0];
 			v = java.lang.Math.max(v, minVal);
 			if(v>=beta) //return val if greater than equal to beta
@@ -165,7 +178,7 @@ public class OthelloMain {
 		}
 		//otherwise compute, take turn, and change board
 		else {
-			for(int[] a: state.actions('W')) {//for each action
+			for(int[] a: state.actions('W', true)) {//for each action
 				Board copy = new Board(state);
 				copy.legalMove(a[0], a[1], 'W', true);
 				//copy.printBoard('W');
@@ -201,10 +214,12 @@ public class OthelloMain {
 			switch(heur) {
 			case "getHeuristic":
 				return new int[]{state.getHeuristic('B'), -1, -1};
-			case "getHeuristic2":
-				return new int[]{state.getHeuristic2('B'), -1, -1};
+			case "getHeuristicMobility":
+				return new int[]{state.getHeuristicMobility('B'), -1, -1};
 			case "getHeuristicDiscsMovesCorners":
 				return new int[]{state.getHeuristicDiscsMovesCorners('B'), -1, -1};		
+			case "getHeuristicCoinParityEndGame":
+				return new int[]{state.getHeuristicCoinParityEndGame('B'), -1, -1};
 			}
 		}
 
@@ -212,7 +227,7 @@ public class OthelloMain {
 		int[] action = {-1,-1}; //init action
 
 		//if no available actions : compute but don't change board
-		if(state.actions('B').isEmpty()) {
+		if(state.actions('B', false).isEmpty()) {
 			int maxVal = maxValue(state, depth-1, alpha, beta, heur)[0];
 			v = java.lang.Math.min(v, maxVal);
 			if(v<=alpha) //return val if less than equal to alpha
@@ -221,7 +236,7 @@ public class OthelloMain {
 		}
 		//otherwise compute, take turn, and change board
 		else {
-			for(int[] a: state.actions('B')) {//for each action
+			for(int[] a: state.actions('B', true)) {//for each action
 				Board copy  = new Board(state);
 				copy.legalMove(a[0], a[1],'B', true);
 				//copy.printBoard('B');

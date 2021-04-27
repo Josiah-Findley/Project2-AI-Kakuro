@@ -113,6 +113,24 @@ public class Board {
 				}
 		return true; // return true if board is full
 	}
+	
+	/**
+	 * Board is at the endgame stage
+	 * @param depth - curr depth of search
+	 */
+	public boolean isEndGame(int depth) {
+		int numMovesLeft = 0; //number of moves left
+		// For each space check valid moves
+		for (int i = 0; i < board.length; i++)
+			for (int j = 0; j < board.length; j++)
+				if (board[i][j] == 'O') {// if moves possible
+					numMovesLeft++;
+				}
+		if(numMovesLeft<=depth)
+			return true; // return true if board is in endgame
+		else 
+			return false;
+	}
 
 	/**
 	 * Actions available
@@ -237,39 +255,40 @@ public class Board {
 		return legal;
 	}
 
+	
+	
+	
 	/*
 	 * All heuristics were researched and then implemented from a variety of different ideas
 	 */
 
-	public int getHeuristic(char turn) {
+	/*
+	 * Used in end game 
+	 */
+	public int getHeuristicCoinParityEndGame(char turn) {
 		// give each square a certain value
 		// corners are most valuable
-
-		int[][] values = { { 10, 2, 7, 7, 7, 7, 2, 10 }, { 2, -4, 1, 1, 1, 1, -4, 2 }, { 7, 1, 1, 1, 1, 1, 1, 7 },
-				{ 7, 1, 1, 1, 1, 1, 1, 7 }, { 7, 1, 1, 1, 1, 1, 1, 7 }, { 7, 1, 1, 1, 1, 1, 1, 7 },
-				{ 2, -4, 1, 1, 1, 1, -4, 2 }, { 10, 2, 7, 7, 7, 7, 2, 10 } };
-
 		int heur = 0;
 
 		//Find the heur by finding the net sum
 		for (int y = 1; y < 9; y++)
 			for (int x = 1; x < 9; x++) {
 				if (board[x][y] == turn)
-					heur += values[y - 1][x - 1];
+					heur += 1;
 				else if (board[x][y] != 'O')
-					heur -= values[y - 1][x - 1];
+					heur -= 1;
 			}
 
 		return turn == 'W' ? heur : -heur;
 	}
 
-	public int getHeuristic2(char turn) {
+	public int getHeuristic(char turn) {
 		// give each square a certain value
 		// corners are most valuable
 
-		int[][] values = { { 4, -3, 2, 2, 2, 2, -3, 4 }, { -3, -4, -1, -1, -1, -1, -4, -3 },
+		int[][] values = { { 10, -3, 2, 2, 2, 2, -3, 10 }, { -3, -4, -1, -1, -1, -1, -4, -3 }, { 2, -1, 1, 0, 0, 1, -1, 2 },
 				{ 2, -1, 0, 1, 1, 0, -1, 2 }, { 2, -1, 0, 1, 1, 0, -1, 2 }, { 2, -1, 1, 0, 0, 1, -1, 2 },
-				{ -3, -4, -1, -1, -1, -1, -4, -3 }, { 4, -3, 2, 2, 2, 2, -3, 4 } };
+				{ -3, -4, -1, -1, -1, -1, -4, -3 }, { 10, -3, 2, 2, 2, 2, -3, 10 } };
 
 		int heur = 0;
 		//Find the heur by finding the net sum
@@ -281,6 +300,37 @@ public class Board {
 					heur -= values[y - 1][x - 1];
 			}
 		return turn == 'W' ? heur : -heur;
+	}
+	
+	public int getHeuristicMobility(char turn) {
+		// give each square a certain value
+		// corners are most valuable
+
+		int[][] values = { { 100, -3, 2, 2, 2, 2, -3, 100 }, { -3, -4, -1, -1, -1, -1, -4, -3 }, { 2, -1, 1, 0, 0, 1, -1, 2 },
+				{ 2, -1, 0, 1, 1, 0, -1, 2 }, { 2, -1, 0, 1, 1, 0, -1, 2 }, { 2, -1, 1, 0, 0, 1, -1, 2 },
+				{ -3, -4, -1, -1, -1, -1, -4, -3 }, { 100, -3, 2, 2, 2, 2, -3, 100 } };		
+		//get opp turn
+		char oppTurn;
+		if (turn == 'B') {
+			oppTurn = 'W';
+		} else {
+			oppTurn = 'B';
+		}	
+		//Calculate Heuristic
+		int heur = 0;
+		for (int y = 1; y < 9; y++)
+			for (int x = 1; x < 9; x++) {
+				if (board[x][y] == turn) {
+					heur += values[y - 1][x - 1];
+					heur -= calculatePotentialMobility(turn, y, x);
+				}
+				else if (board[x][y] != 'O') {
+					heur -= values[y - 1][x - 1];
+				heur -= calculatePotentialMobility(oppTurn, y, x);
+				}
+			}
+
+		return turn == 'W' ? heur + actions('W', false).size() : -heur-actions('B', false).size();
 	}
 
 	public int getHeuristicDiscsMovesCorners(char turn) {
@@ -290,9 +340,9 @@ public class Board {
 		int[][] values = { { 100, -3, 2, 2, 2, 2, -3, 100 }, { -3, -4, -1, -1, -1, -1, -4, -3 }, { 2, -1, 1, 0, 0, 1, -1, 2 },
 				{ 2, -1, 0, 1, 1, 0, -1, 2 }, { 2, -1, 0, 1, 1, 0, -1, 2 }, { 2, -1, 1, 0, 0, 1, -1, 2 },
 				{ -3, -4, -1, -1, -1, -1, -4, -3 }, { 100, -3, 2, 2, 2, 2, -3, 100 } };
-
+		
+		//Calculate heuristic
 		int heur = 0;
-
 		for (int y = 1; y < 9; y++)
 			for (int x = 1; x < 9; x++) {
 				if (board[x][y] == turn)
@@ -326,60 +376,43 @@ public class Board {
 		while (i < 8) {
 			switch (i) {
 			case 0:
-				if (legalMove(row - 1, col - 1, turn, false) == true) {
-					if (getBoardSpaceValue(row - 1, col - 1) != color) {
-						numOpposite++;
-					}
+				if (getBoardSpaceValue(row - 1, col - 1) != color) {
+					numOpposite++;
 				}
 				break;
-
 			case 1:
-				if (legalMove(row - 1, col, turn, false) == true) {
-					if (getBoardSpaceValue(row - 1, col) != color) {
-						numOpposite++;
-					}
+				if (getBoardSpaceValue(row - 1, col) != color) {
+					numOpposite++;
 				}
 				break;
 			case 2:
-				if (legalMove(row - 1, col + 1, turn, false) == true) {
-					if (getBoardSpaceValue(row - 1, col + 1) != color) {
-						numOpposite++;
-					}
+				if (getBoardSpaceValue(row - 1, col + 1) != color) {
+					numOpposite++;
 				}
 				break;
 			case 3:
-				if (legalMove(row, col - 1, turn, false) == true) {
-					if (getBoardSpaceValue(row, col - 1) != color) {
-						numOpposite++;
-					}
+				if (getBoardSpaceValue(row, col - 1) != color) {
+					numOpposite++;
 				}
 				break;
 			case 4:
-				if (legalMove(row, col + 1, turn, false) == true) {
-					if (getBoardSpaceValue(row, col) != color) {
-						numOpposite++;
-					}
+				if (getBoardSpaceValue(row, col) != color) {
+					numOpposite++;
 				}
 				break;
 			case 5:
-				if (legalMove(row + 1, col - 1, turn, false) == true) {
-					if (getBoardSpaceValue(row + 1, col - 1) != color) {
-						numOpposite++;
-					}
+				if (getBoardSpaceValue(row + 1, col - 1) != color) {
+					numOpposite++;
 				}
 				break;
 			case 6:
-				if (legalMove(row + 1, col, turn, false) == true) {
-					if (getBoardSpaceValue(row + 1, col) != color) {
-						numOpposite++;
-					}
+				if (getBoardSpaceValue(row + 1, col) != color) {
+					numOpposite++;
 				}
 				break;
 			case 7:
-				if (legalMove(row + 1, col + 1, turn, false) == true) {
-					if (getBoardSpaceValue(row + 1, col + 1) != color) {
-						numOpposite++;
-					}
+				if (getBoardSpaceValue(row + 1, col + 1) != color) {
+					numOpposite++;
 				}
 				break;
 			}
