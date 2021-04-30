@@ -16,8 +16,9 @@ public class OthelloMain {
 	static int minDepth = 3;
 	static boolean whiteComp = true;
 	static boolean blackComp = true;
-	static String whiteHeur = "getHeuristicMobility";
-	static String blackHeur = "getHeuristicMobility";
+	static String Heur1 = "getHeuristic";
+	static String Heur2 = "getHeuristicDiscsMovesCorners";
+	static String Heur3 = "getHeuristicMobility";
 	static String endGameHeur = "getHeuristicCoinParityEndGame";
 
 	/**
@@ -44,7 +45,7 @@ public class OthelloMain {
 			whiteDepth = i;
 			blackDepth = i;
 			while(!gameBoard.isFull() && (gameBoard.actions(black,false).size()!=0 || gameBoard.actions(white,false).size()!=0)) {			
-				runRound( gameBoard, whiteHeur, blackHeur, sc);		
+				runRound( gameBoard, Heur1, Heur1, sc);		
 			}
 			System.out.println(whiteDepth+" "+blackDepth);
 			//while game not over
@@ -86,11 +87,11 @@ public class OthelloMain {
 				int[] compMove;//comps move
 				if(gameBoard.isEndGame(blackDepth)) {//if endgame
 					compMove = alphaBetaSearch(gameBoard, blackDepth, black, endGameHeur);			
-					//compMove = iterativeDeepening(gameBoard, time, minDepth, blackDepth, black,"getHeuristicCoinParityEndGame");			
+					//compMove = iterativeDeepening(gameBoard, time, minDepth, blackDepth, black, endGameHeur);			
 				}
 				else{//not endgame
 					compMove = alphaBetaSearch(gameBoard, blackDepth, black, blackHeur);
-					//compMove = iterativeDeepening(gameBoard, time, minDepth, blackDepth, black,"getHeuristicMobility");
+					//compMove = iterativeDeepening(gameBoard, time, minDepth, blackDepth, black, blackHeur);
 				}
 				//if move legal
 				if(compMove[0]!=-1)
@@ -99,7 +100,6 @@ public class OthelloMain {
 			//gameBoard.printBoard(white);//print board	
 		}
 	}
-
 
 	/*
 	 * Makes a human move
@@ -184,10 +184,10 @@ public class OthelloMain {
 	 */
 	public static int[] alphaBetaSearch(Board state, int depth, char turn, String heur) {
 		int[] action = null;//init action	
-		if(turn=='W') { //if whites turn 		
+		if(turn==white) { //if whites turn 		
 			action = maxValue(state, depth, Integer.MIN_VALUE, Integer.MAX_VALUE, heur);
 		}	 
-		else if(turn=='B') {
+		else if(turn==black) {
 			action = minValue(state, depth, Integer.MIN_VALUE, Integer.MAX_VALUE, heur);
 		}	
 		return new int[] {action[1], action[2]}; //return last action
@@ -204,13 +204,13 @@ public class OthelloMain {
 		if(depth == 0||state.isFull())//terminal conditions
 			switch(heur) {//which heuristic is being used
 			case "getHeuristic":
-				return new int[]{state.getHeuristic('W'), -1, -1};
+				return new int[]{state.getHeuristic(white), -1, -1};
 			case "getHeuristicMobility":
-				return new int[]{state.getHeuristicMobility('W'), -1, -1};
+				return new int[]{state.getHeuristicMobility(white), -1, -1};
 			case "getHeuristicDiscsMovesCorners":
-				return new int[]{state.getHeuristicDiscsMovesCorners('W'), -1, -1};	
+				return new int[]{state.getHeuristicDiscsMovesCorners(white), -1, -1};	
 			case "getHeuristicCoinParityEndGame":
-				return new int[]{state.getHeuristicCoinParityEndGame('W'), -1, -1};
+				return new int[]{state.getHeuristicCoinParityEndGame(white), -1, -1};
 			}
 
 
@@ -218,7 +218,7 @@ public class OthelloMain {
 		int[] action = {-1,-1}; //init action
 
 		//if no available actions : compute but don't cahnge board
-		if(state.actions('W', false).isEmpty()) {
+		if(state.actions(white, false).isEmpty()) {
 			int minVal = minValue(state, depth-1, alpha, beta, heur)[0];
 			v = java.lang.Math.max(v, minVal);
 			if(v>=beta) //return val if greater than equal to beta
@@ -227,10 +227,10 @@ public class OthelloMain {
 		}
 		//otherwise compute, take turn, and change board
 		else {
-			for(int[] a: state.actions('W', true)) {//for each action
+			for(int[] a: state.actions(white, true)) {//for each action
 				Board copy = new Board(state);
-				copy.legalMove(a[0], a[1], 'W', true);
-				//copy.printBoard('W');
+				copy.legalMove(a[0], a[1], white, true);
+				//copy.printBoard(white);
 				//System.out.println("depth: "+depth);
 				//grab minVal
 				int minVal = minValue(copy, depth-1, alpha, beta, heur)[0];
@@ -262,13 +262,13 @@ public class OthelloMain {
 		if(depth == 0||state.isFull()) {//terminal conditions
 			switch(heur) {//which heuristic is being used
 			case "getHeuristic":
-				return new int[]{state.getHeuristic('B'), -1, -1};
+				return new int[]{state.getHeuristic(black), -1, -1};
 			case "getHeuristicMobility":
-				return new int[]{state.getHeuristicMobility('B'), -1, -1};
+				return new int[]{state.getHeuristicMobility(black), -1, -1};
 			case "getHeuristicDiscsMovesCorners":
-				return new int[]{state.getHeuristicDiscsMovesCorners('B'), -1, -1};		
+				return new int[]{state.getHeuristicDiscsMovesCorners(black), -1, -1};		
 			case "getHeuristicCoinParityEndGame":
-				return new int[]{state.getHeuristicCoinParityEndGame('B'), -1, -1};
+				return new int[]{state.getHeuristicCoinParityEndGame(black), -1, -1};
 			}
 		}
 
@@ -276,7 +276,7 @@ public class OthelloMain {
 		int[] action = {-1,-1}; //init action
 
 		//if no available actions : compute but don't change board
-		if(state.actions('B', false).isEmpty()) {
+		if(state.actions(black, false).isEmpty()) {
 			int maxVal = maxValue(state, depth-1, alpha, beta, heur)[0];
 			v = java.lang.Math.min(v, maxVal);
 			if(v<=alpha) //return val if less than equal to alpha
@@ -285,10 +285,10 @@ public class OthelloMain {
 		}
 		//otherwise compute, take turn, and change board
 		else {
-			for(int[] a: state.actions('B', true)) {//for each action
+			for(int[] a: state.actions(black, true)) {//for each action
 				Board copy  = new Board(state);
-				copy.legalMove(a[0], a[1],'B', true);
-				//copy.printBoard('B');
+				copy.legalMove(a[0], a[1],black, true);
+				//copy.printBoard(black);
 				//System.out.println("depth: "+depth);
 				//grab maxVal
 				int maxVal = maxValue(copy, depth-1, alpha, beta, heur)[0];
