@@ -12,10 +12,11 @@ public class OthelloMain {
 	static char black = 'B';
 	static int whiteDepth = 5;
 	static int blackDepth = 17;
-	static int time = 4;//seconds for search
+	static int time = 9;//seconds for search
 	static int minDepth = 3;
 	static boolean whiteComp = true;
 	static boolean blackComp = true;
+	static boolean iterativeDeepening = false;
 	static String Heur1 = "getHeuristic";
 	static String Heur2 = "getHeuristicDiscsMovesCorners";
 	static String Heur3 = "getHeuristicMobility";
@@ -27,33 +28,34 @@ public class OthelloMain {
 	 */
 	public static void main(String[] args) {
 		// you may change the input to experiment with other boards
-		Board b = new Board();
-		gameLoop(b);
+		gameLoop();
 		System.out.println("\n\n**Normal Termination**");
 	}
 
 	/*
-	 * Runs game and takes in initial gameBoard
+	 * Runs game 
 	 */
-	public static void gameLoop(Board gameBoard) {
-
+	public static void gameLoop() {
+		Board gameBoard = new Board();//Create Board
 		Scanner sc = new Scanner (System.in);//open scanner
 
 		//Print initial board
 		gameBoard.printBoard(white);
-		for(int i=3; i<9;i++) {
+		
+		//Run simulations
+		for(int i=7; i<8;i++) {
+			gameBoard = new Board();//Create Board
 			whiteDepth = i;
 			blackDepth = i;
 			while(!gameBoard.isFull() && (gameBoard.actions(black,false).size()!=0 || gameBoard.actions(white,false).size()!=0)) {			
-				runRound( gameBoard, Heur1, Heur1, sc);		
+				runRound(gameBoard, endGameHeur, Heur1, iterativeDeepening, sc);
 			}
 			System.out.println(whiteDepth+" "+blackDepth);
-			//while game not over
+			//gameBoard.printBoard(white);//print board
 		}
-		gameBoard.printBoard(white);//print board
 		sc.close();//close scanner
 	}
-	
+
 	/**
 	 * Runs one turn of black and white
 	 * @param gameBoard - current gameboard
@@ -61,43 +63,54 @@ public class OthelloMain {
 	 * @param blackHeur - black heuristic
 	 * @param sc - current scanner
 	 */
-	public static void runRound(Board gameBoard, String whiteHeur, String blackHeur, Scanner sc) {	
-		//whites turn
+	public static void runRound(Board gameBoard, String whiteHeur, String blackHeur, boolean iterativeDeepening, Scanner sc) {	
+		//********************whites turn********************//
 		if(gameBoard.actions(white, false).size()!=0) {//if available actions
 			if(!whiteComp)//if still humans move
 				whiteComp = makeHumanMove(white, gameBoard, sc);
 			if(whiteComp) {//if comps move
 				int[] compMove;
 				if(gameBoard.isEndGame(whiteDepth)) {//if endgame
-					compMove = alphaBetaSearch(gameBoard, whiteDepth, white, endGameHeur);			
+					if(!iterativeDeepening)//no iterative deepening
+						compMove = alphaBetaSearch(gameBoard, whiteDepth, white, endGameHeur);			
+					else//if iterative deepening
+						compMove = iterativeDeepening(gameBoard, time, minDepth, whiteDepth, white, endGameHeur);			
 				}
-				else//not endgame
-					compMove = alphaBetaSearch(gameBoard, whiteDepth, white, whiteHeur);
+				else{//not endgame
+					if(!iterativeDeepening)//no iterative deepening
+						compMove = alphaBetaSearch(gameBoard, whiteDepth, white, whiteHeur);
+					else//if iterative deepening
+						compMove = iterativeDeepening(gameBoard, time, minDepth, whiteDepth, white, whiteHeur);
+				}
 				//if move legal
 				if(compMove[0]!=-1)
 					gameBoard.legalMove(compMove[0], compMove[1], white, true);						
 			}			
-			//gameBoard.printBoard(black);//print board
+			gameBoard.printBoard(black);//print board
 		}
-		//blacks turn
+		//********************blacks turn********************//
 		if(gameBoard.actions(black, false).size()!=0) {
 			if(!blackComp)//if humans move
 				blackComp = makeHumanMove(black, gameBoard, sc);
 			if(blackComp) {//if comps move
 				int[] compMove;//comps move
 				if(gameBoard.isEndGame(blackDepth)) {//if endgame
-					compMove = alphaBetaSearch(gameBoard, blackDepth, black, endGameHeur);			
-					//compMove = iterativeDeepening(gameBoard, time, minDepth, blackDepth, black, endGameHeur);			
+					if(!iterativeDeepening)//no iterative deepening
+						compMove = alphaBetaSearch(gameBoard, blackDepth, black, endGameHeur);			
+					else//if iterative deepening
+						compMove = iterativeDeepening(gameBoard, time, minDepth, blackDepth, black, endGameHeur);			
 				}
 				else{//not endgame
-					compMove = alphaBetaSearch(gameBoard, blackDepth, black, blackHeur);
-					//compMove = iterativeDeepening(gameBoard, time, minDepth, blackDepth, black, blackHeur);
+					if(!iterativeDeepening)//no iterative deepening
+						compMove = alphaBetaSearch(gameBoard, blackDepth, black, blackHeur);
+					else//if iterative deepening
+						compMove = iterativeDeepening(gameBoard, time, minDepth, blackDepth, black, blackHeur);
 				}
 				//if move legal
 				if(compMove[0]!=-1)
 					gameBoard.legalMove(compMove[0], compMove[1], black, true);						
 			}			
-			//gameBoard.printBoard(white);//print board	
+			gameBoard.printBoard(white);//print board	
 		}
 	}
 
@@ -162,16 +175,14 @@ public class OthelloMain {
 		start = System.nanoTime();//Start timer
 		for(int i =initDepth; i<=depth;i++) {//run iterative deepening until time is hit
 
-			if((System.nanoTime()-start)/1_000_000_000<time) {
-				System.out.println((System.nanoTime()-start)/1_000_000_000);
+			if((System.nanoTime()-start)/1_000_000_000<time) {//If under time
+				//System.out.println((System.nanoTime()-start)/1_000_000_000);
 				action = alphaBetaSearch(state, i, turn, heur);
 			}
-			else {
-
-				System.out.println((System.nanoTime()-start)/1_000_000_000);
+			else {//return action
+				//System.out.println((System.nanoTime()-start)/1_000_000_000);
 				return action;
 			}
-
 		}
 		return action;
 	}
@@ -190,6 +201,7 @@ public class OthelloMain {
 		else if(turn==black) {
 			action = minValue(state, depth, Integer.MIN_VALUE, Integer.MAX_VALUE, heur);
 		}	
+		System.out.println(action[0]+": HeurValue  "+" Row: "+action[1]+" Col: "+action[2]);
 		return new int[] {action[1], action[2]}; //return last action
 	}
 

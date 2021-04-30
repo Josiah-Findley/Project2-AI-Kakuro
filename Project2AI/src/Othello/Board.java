@@ -274,7 +274,6 @@ public class Board {
 				else if (board[x][y] != 'O')
 					heur -= 1;
 			}
-
 		return turn == 'W' ? heur : -heur;
 	}
 
