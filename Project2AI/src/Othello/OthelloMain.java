@@ -10,12 +10,12 @@ public class OthelloMain {
 	//Data Variables
 	static char white = 'W';
 	static char black = 'B';
-	static int whiteDepth = 5;
-	static int blackDepth = 17;
-	static int time = 9;//seconds for search
+	static int whiteDepth = 8;
+	static int blackDepth = 8;
+	static int time = 5;//seconds for search
 	static int minDepth = 3;
-	static boolean whiteComp = true;
-	static boolean blackComp = true;
+	static boolean whiteComp = false;
+	static boolean blackComp = false;
 	static boolean runEndgame = true;
 	static boolean iterativeDeepening = false;
 	static String Heur1 = "getHeuristic";
@@ -44,15 +44,15 @@ public class OthelloMain {
 		gameBoard.printBoard(white);
 		
 		//Run simulations
-		for(int i=7; i<8;i++) {
+		for(int i=3; i<8;i++) {
 			gameBoard = new Board();//Create Board
 			whiteDepth = i;
 			blackDepth = i;
 			while(!gameBoard.isFull() && (gameBoard.actions(black,false).size()!=0 || gameBoard.actions(white,false).size()!=0)) {			
 				runRound(gameBoard, Heur1, Heur1, iterativeDeepening, sc);
 			}
-			System.out.println(whiteDepth+" "+blackDepth);
-			//gameBoard.printBoard(white);//print board
+			//System.out.println(whiteDepth+" "+blackDepth);
+			gameBoard.printBoard(white);//print board
 		}
 		sc.close();//close scanner
 	}
@@ -87,7 +87,7 @@ public class OthelloMain {
 				if(compMove[0]!=-1)
 					gameBoard.legalMove(compMove[0], compMove[1], white, true);						
 			}			
-			gameBoard.printBoard(black);//print board
+			//gameBoard.printBoard(black);//print board
 		}
 		//********************blacks turn********************//
 		if(gameBoard.actions(black, false).size()!=0) {
@@ -111,7 +111,7 @@ public class OthelloMain {
 				if(compMove[0]!=-1)
 					gameBoard.legalMove(compMove[0], compMove[1], black, true);						
 			}			
-			gameBoard.printBoard(white);//print board	
+			//gameBoard.printBoard(white);//print board	
 		}
 	}
 
@@ -202,7 +202,7 @@ public class OthelloMain {
 		else if(turn==black) {
 			action = minValue(state, depth, Integer.MIN_VALUE, Integer.MAX_VALUE, heur);
 		}	
-		System.out.println(action[0]+": HeurValue  "+" Row: "+action[1]+" Col: "+action[2]);
+		//System.out.println(action[0]+": HeurValue  "+" Row: "+action[1]+" Col: "+action[2]);
 		return new int[] {action[1], action[2]}; //return last action
 	}
 
