@@ -16,6 +16,7 @@ public class OthelloMain {
 	static int minDepth = 3;
 	static boolean whiteComp = true;
 	static boolean blackComp = true;
+	static boolean runEndgame = true;
 	static boolean iterativeDeepening = false;
 	static String Heur1 = "getHeuristic";
 	static String Heur2 = "getHeuristicDiscsMovesCorners";
@@ -48,7 +49,7 @@ public class OthelloMain {
 			whiteDepth = i;
 			blackDepth = i;
 			while(!gameBoard.isFull() && (gameBoard.actions(black,false).size()!=0 || gameBoard.actions(white,false).size()!=0)) {			
-				runRound(gameBoard, endGameHeur, Heur1, iterativeDeepening, sc);
+				runRound(gameBoard, Heur1, Heur1, iterativeDeepening, sc);
 			}
 			System.out.println(whiteDepth+" "+blackDepth);
 			//gameBoard.printBoard(white);//print board
@@ -70,7 +71,7 @@ public class OthelloMain {
 				whiteComp = makeHumanMove(white, gameBoard, sc);
 			if(whiteComp) {//if comps move
 				int[] compMove;
-				if(gameBoard.isEndGame(whiteDepth)) {//if endgame
+				if(gameBoard.isEndGame(whiteDepth)&&runEndgame) {//if endgame
 					if(!iterativeDeepening)//no iterative deepening
 						compMove = alphaBetaSearch(gameBoard, whiteDepth, white, endGameHeur);			
 					else//if iterative deepening
@@ -94,7 +95,7 @@ public class OthelloMain {
 				blackComp = makeHumanMove(black, gameBoard, sc);
 			if(blackComp) {//if comps move
 				int[] compMove;//comps move
-				if(gameBoard.isEndGame(blackDepth)) {//if endgame
+				if(gameBoard.isEndGame(blackDepth)&&runEndgame) {//if endgame
 					if(!iterativeDeepening)//no iterative deepening
 						compMove = alphaBetaSearch(gameBoard, blackDepth, black, endGameHeur);			
 					else//if iterative deepening
