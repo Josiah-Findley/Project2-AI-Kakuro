@@ -14,10 +14,10 @@ public class OthelloMain {
 	static int blackDepth = 8;
 	static double time = 0.25;//seconds for search
 	static int minDepth = 3;
-	static boolean whiteComp = false;
-	static boolean blackComp = false;
+	static boolean whiteComp = true;
+	static boolean blackComp = true;
 	static boolean runEndgame = true;
-	static boolean iterativeDeepening = true;
+	static boolean iterativeDeepening = false;
 	static String Heur1 = "getHeuristic";
 	static String Heur2 = "getHeuristicDiscsMovesCorners";
 	static String Heur3 = "getHeuristicMobility";
@@ -45,7 +45,7 @@ public class OthelloMain {
 
 		//run game
 		while(!gameBoard.isFull() && (gameBoard.actions(black,false).size()!=0 || gameBoard.actions(white,false).size()!=0)) {			
-			runRound(gameBoard, Heur1, Heur1, sc);
+			runRound(gameBoard, Heur3, Heur3, sc);
 		}
 
 		sc.close();//close scanner
