@@ -10,9 +10,9 @@ public class OthelloMain {
 	//Data Variables
 	static char white = 'W';
 	static char black = 'B';
-	static int whiteDepth = 7;
-	static int blackDepth = 7;
-	static int time = 1;//seconds for search
+	static int whiteDepth = 8;
+	static int blackDepth = 8;
+	static double time = 0.25;//seconds for search
 	static int minDepth = 3;
 	static boolean whiteComp = false;
 	static boolean blackComp = false;
@@ -45,7 +45,7 @@ public class OthelloMain {
 
 		//run game
 		while(!gameBoard.isFull() && (gameBoard.actions(black,false).size()!=0 || gameBoard.actions(white,false).size()!=0)) {			
-			runRound(gameBoard, Heur3, Heur3, sc);
+			runRound(gameBoard, Heur1, Heur1, sc);
 		}
 
 		sc.close();//close scanner
@@ -164,18 +164,18 @@ public class OthelloMain {
 	 * @param heur - heuristic used
 	 * @return - action returned
 	 */
-	public static int[] iterativeDeepening(Board state, int time, int initDepth, int depth, char turn, String heur) {
+	public static int[] iterativeDeepening(Board state, double time, int initDepth, int depth, char turn, String heur) {
 		int[] action = null;//init action
 		//vars for timing
 		long start;
 		start = System.nanoTime();//Start timer
 		for(int i =initDepth; i<=depth;i++) {//run iterative deepening until time is hit
-			if((System.nanoTime()-start)/1_000_000_000<time) {//If under time
-				//System.out.println((System.nanoTime()-start)/1_000_000_000);
+			if(((double)System.nanoTime()-start)/1_000_000_000<time) {//If under time
+				//System.out.println(((double)System.nanoTime()-start)/1_000_000_000);
 				action = alphaBetaSearch(state, i, turn, heur);
 			}
 			else {//return action
-				//System.out.println((System.nanoTime()-start)/1_000_000_000);
+				//System.out.println(((double)System.nanoTime()-start)/1_000_000_000);
 				return action;
 			}
 		}
